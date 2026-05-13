@@ -21,6 +21,20 @@ defmodule AshStorageDemo.Feed.Post do
     service({AshStorage.Service.S3, Application.compile_env(:ash_storage_demo, :s3)})
 
     has_one_attached :cover_image do
+      # Mirror S3 (primary) → Disk (secondary). Reads consult S3 first and fall
+      # through to Disk on :not_found; writes fan out to both. Demonstrates
+      # the upstream `AshStorage.Service.Mirror` roadmap item.
+      service(
+        {AshStorage.Service.S3,
+         Application.compile_env(:ash_storage_demo, :s3) ++
+           [
+             mirrors: [
+               {AshStorage.Service.Disk,
+                root: "priv/storage/cover_images_mirror", base_url: "/files/cover_images_mirror"}
+             ]
+           ]}
+      )
+
       analyzer(AshStorageDemo.Analyzers.FileInfo)
       analyzer(AshStorageDemo.Analyzers.ImageDimensions)
 

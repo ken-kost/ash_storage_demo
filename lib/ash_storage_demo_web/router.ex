@@ -39,7 +39,17 @@ defmodule AshStorageDemoWeb.Router do
 
   forward "/files/documents", AshStorage.Plug.DiskServe, root: "priv/storage/documents"
 
+  forward "/files/cover_images_mirror", AshStorage.Plug.DiskServe,
+    root: "priv/storage/cover_images_mirror"
+
   forward "/media", AshStorage.Plug.Proxy,
+    service: {AshStorage.Service.S3, Application.compile_env(:ash_storage_demo, :s3)}
+
+  # Alternative S3 access pattern: issue an HTTP redirect to a presigned
+  # service URL instead of streaming bytes through the app. FeedLive exposes
+  # a toggle that flips rendered URLs between /media (proxy) and /r (redirect)
+  # for comparison.
+  forward "/r", AshStorage.Plug.Redirect,
     service: {AshStorage.Service.S3, Application.compile_env(:ash_storage_demo, :s3)}
 
   scope "/", AshStorageDemoWeb do
