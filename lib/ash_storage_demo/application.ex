@@ -11,11 +11,17 @@ defmodule AshStorageDemo.Application do
       AshStorageDemoWeb.Telemetry,
       AshStorageDemo.Repo,
       {DNSCluster, query: Application.get_env(:ash_storage_demo, :dns_cluster_query) || :ignore},
+      {Oban,
+       AshOban.config(
+         Application.fetch_env!(:ash_storage_demo, :ash_domains),
+         Application.fetch_env!(:ash_storage_demo, Oban)
+       )},
       {Phoenix.PubSub, name: AshStorageDemo.PubSub},
       # Start a worker by calling: AshStorageDemo.Worker.start_link(arg)
       # {AshStorageDemo.Worker, arg},
       # Start to serve requests, typically the last entry
-      AshStorageDemoWeb.Endpoint
+      AshStorageDemoWeb.Endpoint,
+      {AshAuthentication.Supervisor, [otp_app: :ash_storage_demo]}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

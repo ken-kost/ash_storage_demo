@@ -1,4 +1,5 @@
 import Config
+config :ash, policies: [show_policy_breakdowns?: true]
 
 # Configure your database
 config :ash_storage_demo, AshStorageDemo.Repo,
@@ -68,7 +69,9 @@ config :ash_storage_demo, AshStorageDemoWeb.Endpoint,
   ]
 
 # Enable dev routes for dashboard and mailbox
-config :ash_storage_demo, dev_routes: true
+config :ash_storage_demo,
+  dev_routes: true,
+  token_signing_secret: "LtRX99/Vx0mXDwZ0jsH1dzCSI6Hk06tc"
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :default_formatter, format: "[$level] $message\n"
