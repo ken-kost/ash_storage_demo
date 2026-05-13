@@ -33,8 +33,14 @@ defmodule AshStorageDemoWeb.Router do
     ash_authentication_live_session :require_authenticated,
       on_mount: [{AshStorageDemoWeb.LiveUserAuth, :live_user_required}] do
       live "/profile", ProfileLive
+      live "/feed", FeedLive
     end
   end
+
+  forward "/files/documents", AshStorage.Plug.DiskServe, root: "priv/storage/documents"
+
+  forward "/media", AshStorage.Plug.Proxy,
+    service: {AshStorage.Service.S3, Application.compile_env(:ash_storage_demo, :s3)}
 
   scope "/", AshStorageDemoWeb do
     pipe_through :browser
