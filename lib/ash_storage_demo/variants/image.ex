@@ -46,7 +46,7 @@ defmodule AshStorageDemo.Variants.Image do
     Image.thumbnail(image, "#{width}x#{height}")
   end
 
-  defp write(image, path, nil), do: Image.write(image, path)
+  defp write(image, path, nil), do: Image.write(image, path, suffix: ".jpg")
 
   defp write(image, path, format) when format in [:jpg, :png, :webp] do
     Image.write(image, path, suffix: ".#{format}")

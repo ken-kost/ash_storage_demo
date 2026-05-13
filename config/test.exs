@@ -4,6 +4,19 @@ config :ash_storage_demo, token_signing_secret: "yFULah9n5UNARbuG50yZFuY+Gm+7ZVB
 config :bcrypt_elixir, log_rounds: 1
 config :ash, policies: [show_policy_breakdowns?: true], disable_async?: true
 
+# Flip every host resource to the in-memory test service. This exercises the
+# per-resource Application config override path — proves precedence rule #3
+# (per-env config beats DSL `service`). Mirror is stripped from the test
+# config because Service.Test has no notion of mirroring.
+test_service = [service: {AshStorage.Service.Test, []}]
+config :ash_storage_demo, AshStorageDemo.Accounts.User, storage: test_service
+config :ash_storage_demo, AshStorageDemo.Feed.Post, storage: test_service
+config :ash_storage_demo, AshStorageDemo.Feed.Comment, storage: test_service
+config :ash_storage_demo, AshStorageDemo.Feed.Story, storage: test_service
+config :ash_storage_demo, AshStorageDemo.Feed.Reaction, storage: test_service
+config :ash_storage_demo, AshStorageDemo.Messaging.Message, storage: test_service
+config :ash_storage_demo, AshStorageDemo.Tagging.Tag, storage: test_service
+
 # Configure your database
 #
 # The MIX_TEST_PARTITION environment variable can be used
