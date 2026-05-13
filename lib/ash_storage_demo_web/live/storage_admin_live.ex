@@ -28,8 +28,8 @@ defmodule AshStorageDemoWeb.StorageAdminLive do
     blobs =
       Blob
       |> Ash.Query.sort(id: :desc)
-      |> Ash.Query.limit(50)
-      |> Ash.read!()
+      |> Ash.read!(page: [limit: 50, count: false], authorize?: false)
+      |> page_results()
 
     stats = build_stats()
     orphan_count = length(Orphans.orphan_blobs())
@@ -39,6 +39,9 @@ defmodule AshStorageDemoWeb.StorageAdminLive do
     |> assign(stats: stats)
     |> assign(orphan_count: orphan_count)
   end
+
+  defp page_results(%{results: results}), do: results
+  defp page_results(list) when is_list(list), do: list
 
   defp build_stats do
     rows =
@@ -58,24 +61,29 @@ defmodule AshStorageDemoWeb.StorageAdminLive do
         rows
         |> Enum.group_by(& &1.service_name)
         |> Enum.map(fn {service, group} ->
-          {service, Enum.reduce(group, 0, &(&1.bytes + &2))}
+          {service, Enum.reduce(group, 0, &(to_int(&1.bytes) + &2))}
         end)
         |> Enum.sort_by(fn {_, bytes} -> -bytes end),
       by_content_type:
         rows
         |> Enum.group_by(& &1.content_type)
         |> Enum.map(fn {ct, group} ->
-          {ct || "(unknown)", Enum.reduce(group, 0, &(&1.count + &2))}
+          {ct || "(unknown)", Enum.reduce(group, 0, &(to_int(&1.count) + &2))}
         end)
         |> Enum.sort_by(fn {_, count} -> -count end)
     }
   end
 
+  defp to_int(nil), do: 0
+  defp to_int(%Decimal{} = d), do: Decimal.to_integer(d)
+  defp to_int(n) when is_integer(n), do: n
+
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_user={@current_user}>
       <section class="space-y-8">
+        <Layouts.back_button />
         <header class="space-y-1">
           <h1 class="text-3xl font-bold">Storage admin</h1>
           <p class="text-base-content/70">

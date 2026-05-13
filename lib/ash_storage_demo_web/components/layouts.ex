@@ -27,48 +27,88 @@ defmodule AshStorageDemoWeb.Layouts do
   """
   attr :flash, :map, required: true, doc: "the map of flash messages"
 
-  attr :current_scope, :map,
+  attr :current_user, :map,
     default: nil,
-    doc: "the current [scope](https://hexdocs.pm/phoenix/scopes.html)"
+    doc: "the current authenticated user (nil for guests)"
 
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8">
+    <header class="navbar px-4 sm:px-6 lg:px-8 border-b border-base-300" data-role="app-nav">
       <div class="flex-1">
-        <a href="/" class="flex-1 flex w-fit items-center gap-2">
+        <.link navigate="/" class="flex w-fit items-center gap-2">
           <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">v{Application.spec(:phoenix, :vsn)}</span>
-        </a>
+          <span class="text-sm font-semibold">AshStorageDemo</span>
+        </.link>
       </div>
-      <div class="flex-none">
-        <ul class="flex flex-column px-1 space-x-4 items-center">
-          <li>
-            <a href="https://phoenixframework.org/" class="btn btn-ghost">Website</a>
+      <nav class="flex-none">
+        <ul class="flex items-center gap-1">
+          <li :if={@current_user}>
+            <.link navigate="/feed" class="btn btn-ghost btn-sm" data-role="nav-feed">Feed</.link>
           </li>
-          <li>
-            <a href="https://github.com/phoenixframework/phoenix" class="btn btn-ghost">GitHub</a>
+          <li :if={@current_user}>
+            <.link navigate="/profile" class="btn btn-ghost btn-sm" data-role="nav-profile">
+              Profile
+            </.link>
           </li>
-          <li>
-            <.theme_toggle />
+          <li :if={@current_user}>
+            <.link
+              navigate="/storage-admin"
+              class="btn btn-ghost btn-sm"
+              data-role="nav-storage-admin"
+            >
+              Storage
+            </.link>
           </li>
-          <li>
-            <a href="https://hexdocs.pm/phoenix/overview.html" class="btn btn-primary">
-              Get Started <span aria-hidden="true">&rarr;</span>
-            </a>
+          <li><.theme_toggle /></li>
+          <li :if={@current_user}>
+            <span class="text-xs text-base-content/60 px-2" data-role="current-user">
+              {to_string(@current_user.email)}
+            </span>
+          </li>
+          <li :if={@current_user}>
+            <.link
+              href="/sign-out"
+              method="get"
+              class="btn btn-ghost btn-sm"
+              data-role="nav-sign-out"
+            >
+              Sign out
+            </.link>
+          </li>
+          <li :if={!@current_user}>
+            <.link navigate="/sign-in" class="btn btn-primary btn-sm" data-role="nav-sign-in">
+              Sign in
+            </.link>
           </li>
         </ul>
-      </div>
+      </nav>
     </header>
 
-    <main class="px-4 py-20 sm:px-6 lg:px-8">
+    <main class="px-4 py-10 sm:px-6 lg:px-8">
       <div class="mx-auto max-w-2xl space-y-4">
         {render_slot(@inner_block)}
       </div>
     </main>
 
     <.flash_group flash={@flash} />
+    """
+  end
+
+  @doc """
+  Renders a "← Back to home" link, used as a small header on every nested
+  LiveView. Optional `:to` and `:label` attrs let callers point it elsewhere.
+  """
+  attr :to, :string, default: "/"
+  attr :label, :string, default: "Back to home"
+
+  def back_button(assigns) do
+    ~H"""
+    <.link navigate={@to} class="btn btn-ghost btn-xs gap-1" data-role="back-button">
+      <span aria-hidden="true">&larr;</span>
+      <span>{@label}</span>
+    </.link>
     """
   end
 

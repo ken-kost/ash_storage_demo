@@ -7,12 +7,15 @@ defmodule AshStorageDemoWeb.ProfileLive do
   def mount(_params, _session, socket) do
     user =
       socket.assigns.current_user
-      |> Ash.load!([
-        :avatar_url,
-        :cover_photo_url,
-        avatar: :blob,
-        cover_photo: :blob
-      ])
+      |> Ash.load!(
+        [
+          :avatar_url,
+          :cover_photo_url,
+          avatar: :blob,
+          cover_photo: :blob
+        ],
+        authorize?: false
+      )
 
     {:ok,
      socket
@@ -42,7 +45,8 @@ defmodule AshStorageDemoWeb.ProfileLive do
            {:ok,
             Operations.attach(socket.assigns.user, attachment, bytes,
               filename: entry.client_name,
-              content_type: entry.client_type
+              content_type: entry.client_type,
+              authorize?: false
             )}
          end) do
       [{:ok, _}] ->
@@ -62,7 +66,7 @@ defmodule AshStorageDemoWeb.ProfileLive do
   def handle_event("purge-" <> field, _params, socket) when field in ["avatar", "cover_photo"] do
     attachment = String.to_existing_atom(field)
 
-    case Operations.purge(socket.assigns.user, attachment) do
+    case Operations.purge(socket.assigns.user, attachment, authorize?: false) do
       {:ok, _} ->
         {:noreply,
          socket
@@ -84,7 +88,8 @@ defmodule AshStorageDemoWeb.ProfileLive do
           avatar: :blob,
           cover_photo: :blob
         ],
-        reuse_values?: false
+        reuse_values?: false,
+        authorize?: false
       )
 
     assign(socket, user: user)
@@ -102,8 +107,9 @@ defmodule AshStorageDemoWeb.ProfileLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_user={@current_user}>
       <section class="space-y-8">
+        <Layouts.back_button />
         <header class="space-y-1">
           <h1 class="text-3xl font-bold">Your profile</h1>
           <p class="text-base-content/70">

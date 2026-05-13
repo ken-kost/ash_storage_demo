@@ -141,14 +141,17 @@ defmodule AshStorageDemoWeb.FeedLive do
     posts =
       Post
       |> Ash.Query.sort(inserted_at: :desc)
-      |> Ash.Query.limit(20)
-      |> Ash.read!()
-      |> Ash.load!(@load_spec)
+      |> Ash.read!(page: [limit: 20, count: false], authorize?: false)
+      |> page_results()
+      |> Ash.load!(@load_spec, authorize?: false)
 
     assign(socket, posts: posts)
   end
 
   defp tap_post(socket, _post), do: socket
+
+  defp page_results(%{results: results}), do: results
+  defp page_results(list) when is_list(list), do: list
 
   defp format_error(%Ash.Error.Invalid{} = err), do: Exception.message(err)
   defp format_error(other), do: inspect(other)
@@ -163,8 +166,9 @@ defmodule AshStorageDemoWeb.FeedLive do
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
+    <Layouts.app flash={@flash} current_user={@current_user}>
       <section class="space-y-8">
+        <Layouts.back_button />
         <header class="space-y-1">
           <h1 class="text-3xl font-bold">Feed</h1>
           <p class="text-base-content/70">
