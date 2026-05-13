@@ -28,6 +28,8 @@ defmodule AshStorageDemoWeb.Router do
     ash_authentication_live_session :authenticated_routes,
       on_mount: [{AshStorageDemoWeb.LiveUserAuth, :live_user_optional}] do
       live "/", HomeLive
+      live "/u/:id", PublicFeedLive
+      live "/p/:id", PublicPostLive
     end
 
     ash_authentication_live_session :require_authenticated,

@@ -20,7 +20,12 @@ config :ash_storage_demo, Oban,
     blob_run_pending_variants: 5
   ],
   repo: AshStorageDemo.Repo,
-  plugins: [{Oban.Plugins.Cron, []}]
+  plugins: [
+    {Oban.Plugins.Cron,
+     crontab: [
+       {"*/5 * * * *", AshStorageDemo.Storage.VolumeUsage.Worker}
+     ]}
+  ]
 
 config :ash,
   allow_forbidden_field_for_relationships_by_default?: true,

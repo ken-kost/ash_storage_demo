@@ -5,129 +5,156 @@ defmodule AshStorageDemoWeb.Layouts do
   """
   use AshStorageDemoWeb, :html
 
-  # Embed all files in layouts/* within this module.
-  # The default root.html.heex file contains the HTML
-  # skeleton of your application, namely HTML headers
-  # and other static content.
   embed_templates "layouts/*"
 
   @doc """
-  Renders your app layout.
-
-  This function is typically invoked from every template,
-  and it often contains your application menu, sidebar,
-  or similar.
-
-  ## Examples
-
-      <Layouts.app flash={@flash}>
-        <h1>Content</h1>
-      </Layouts.app>
-
+  Renders your app layout — top nav with brand mark, page links, segmented
+  theme switch (light / dark / system), and user chip. Body slot is
+  centered in a 1100px shell that matches the design canvas width.
   """
-  attr :flash, :map, required: true, doc: "the map of flash messages"
-
-  attr :current_user, :map,
-    default: nil,
-    doc: "the current authenticated user (nil for guests)"
+  attr :flash, :map, required: true
+  attr :current_user, :map, default: nil
+  attr :active, :string, default: nil, doc: "active nav: feed | profile | storage"
 
   slot :inner_block, required: true
 
   def app(assigns) do
     ~H"""
-    <header class="navbar px-4 sm:px-6 lg:px-8 border-b border-base-300" data-role="app-nav">
-      <div class="flex-1">
-        <.link navigate="/" class="flex w-fit items-center gap-2">
-          <img src={~p"/images/logo.svg"} width="36" />
-          <span class="text-sm font-semibold">AshStorageDemo</span>
-        </.link>
+    <header class="nav-bar" data-role="app-nav">
+      <.link navigate="/" class="brand">
+        <span class="brand-logo" aria-hidden="true">
+          <img src={~p"/images/ash-logo.svg"} alt="" />
+          <svg
+            class="brand-tray"
+            viewBox="0 0 40 12"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.4"
+          >
+            <path d="M2 2 H38" stroke-linecap="round" />
+            <path
+              d="M4 2 L7 10 a2 2 0 0 0 2 1 H31 a2 2 0 0 0 2 -1 L36 2"
+              stroke-linejoin="round"
+              stroke-linecap="round"
+            />
+          </svg>
+        </span>
+        <span class="brand-name">Ashtray</span>
+      </.link>
+      <div class="nav-flash" aria-live="polite" data-role="nav-flash">
+        <.inline_flash kind={:info} flash={@flash} />
+        <.inline_flash kind={:error} flash={@flash} />
       </div>
-      <nav class="flex-none">
-        <ul class="flex items-center gap-1">
-          <li :if={@current_user}>
-            <.link navigate="/feed" class="btn btn-ghost btn-sm" data-role="nav-feed">Feed</.link>
-          </li>
-          <li :if={@current_user}>
-            <.link navigate="/profile" class="btn btn-ghost btn-sm" data-role="nav-profile">
-              Profile
-            </.link>
-          </li>
-          <li :if={@current_user}>
-            <.link
-              navigate="/storage-admin"
-              class="btn btn-ghost btn-sm"
-              data-role="nav-storage-admin"
-            >
-              Storage
-            </.link>
-          </li>
-          <li><.theme_toggle /></li>
-          <li :if={@current_user}>
-            <span class="text-xs text-base-content/60 px-2" data-role="current-user">
-              {to_string(@current_user.email)}
-            </span>
-          </li>
-          <li :if={@current_user}>
-            <.link
-              href="/sign-out"
-              method="get"
-              class="btn btn-ghost btn-sm"
-              data-role="nav-sign-out"
-            >
-              Sign out
-            </.link>
-          </li>
-          <li :if={!@current_user}>
-            <.link navigate="/sign-in" class="btn btn-primary btn-sm" data-role="nav-sign-in">
-              Sign in
-            </.link>
-          </li>
-        </ul>
+      <nav class="nav-links">
+        <.link
+          :if={@current_user}
+          navigate="/feed"
+          class={["nav-link", @active == "feed" && "is-active"]}
+          data-role="nav-feed"
+        >
+          Feed
+        </.link>
+        <.link
+          :if={@current_user}
+          navigate="/profile"
+          class={["nav-link", @active == "profile" && "is-active"]}
+          data-role="nav-profile"
+        >
+          Profile
+        </.link>
+        <.link
+          :if={@current_user}
+          navigate="/storage-admin"
+          class={["nav-link", @active == "storage" && "is-active"]}
+          data-role="nav-storage-admin"
+        >
+          Storage
+        </.link>
+        <span class="nav-sep" :if={@current_user} />
+        <.theme_switch />
+        <span :if={@current_user} class="user-chip" data-role="current-user">
+          <span class="user-avatar">{user_initial(@current_user)}</span>
+          <span class="user-email">{to_string(@current_user.email)}</span>
+        </span>
+        <.link
+          :if={@current_user}
+          href="/sign-out"
+          method="get"
+          class="sign-out-chip"
+          data-role="nav-sign-out"
+          aria-label="Sign out"
+        >
+          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7">
+            <path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3" stroke-linecap="round" />
+            <path d="M16 8l4 4-4 4M20 12H10" stroke-linecap="round" stroke-linejoin="round" />
+          </svg>
+          <span>Sign out</span>
+        </.link>
+        <.link
+          :if={!@current_user}
+          navigate="/sign-in"
+          class="btn btn-primary btn-sm"
+          data-role="nav-sign-in"
+        >
+          Sign in
+        </.link>
       </nav>
     </header>
 
-    <main class="px-4 py-10 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-2xl space-y-4">
+    <main class="app-main">
+      <div class="app-shell">
         {render_slot(@inner_block)}
       </div>
     </main>
 
-    <.flash_group flash={@flash} />
+    <.connection_flashes />
     """
   end
 
   @doc """
-  Renders a "← Back to home" link, used as a small header on every nested
-  LiveView. Optional `:to` and `:label` attrs let callers point it elsewhere.
+  Inline flash pill rendered inside the top nav. Auto-dismisses after a
+  short timeout via the `FlashAutoHide` JS hook.
   """
-  attr :to, :string, default: "/"
-  attr :label, :string, default: "Back to home"
+  attr :kind, :atom, required: true
+  attr :flash, :map, required: true
 
-  def back_button(assigns) do
+  def inline_flash(assigns) do
+    msg = Phoenix.Flash.get(assigns.flash, assigns.kind)
+    assigns = assign(assigns, msg: msg, id: "nav-flash-#{assigns.kind}")
+
     ~H"""
-    <.link navigate={@to} class="btn btn-ghost btn-xs gap-1" data-role="back-button">
-      <span aria-hidden="true">&larr;</span>
-      <span>{@label}</span>
-    </.link>
+    <div
+      :if={@msg}
+      id={@id}
+      role="alert"
+      phx-hook="FlashAutoHide"
+      phx-click={JS.push("lv:clear-flash", value: %{key: @kind}) |> JS.hide(to: "##{@id}")}
+      data-flash-kind={@kind}
+      class={["nav-flash-pill", "nav-flash-" <> Atom.to_string(@kind)]}
+    >
+      <span class="nav-flash-icon" aria-hidden="true">
+        <svg :if={@kind == :info} viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 8h.01M11 12h1v5h1" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        <svg :if={@kind == :error} viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8">
+          <circle cx="12" cy="12" r="9" />
+          <path d="M12 7v6m0 3v.5" stroke-linecap="round" />
+        </svg>
+      </span>
+      <span class="nav-flash-msg">{@msg}</span>
+      <button type="button" class="nav-flash-close" aria-label="Dismiss">×</button>
+    </div>
     """
   end
 
   @doc """
-  Shows the flash group with standard titles and content.
-
-  ## Examples
-
-      <.flash_group flash={@flash} />
+  Floating connection-status flashes — only show when the live socket is
+  disconnected.
   """
-  attr :flash, :map, required: true, doc: "the map of flash messages"
-  attr :id, :string, default: "flash-group", doc: "the optional id of flash container"
-
-  def flash_group(assigns) do
+  def connection_flashes(assigns) do
     ~H"""
-    <div id={@id} aria-live="polite">
-      <.flash kind={:info} flash={@flash} />
-      <.flash kind={:error} flash={@flash} />
-
+    <div id="connection-flashes" aria-live="polite">
       <.flash
         id="client-error"
         kind={:error}
@@ -156,39 +183,61 @@ defmodule AshStorageDemoWeb.Layouts do
   end
 
   @doc """
-  Provides dark vs light theme toggle based on themes defined in app.css.
-
-  See <head> in root.html.heex which applies the theme before page load.
+  Renders a back link, used as a small header on every nested LiveView.
   """
-  def theme_toggle(assigns) do
+  attr :to, :string, default: "/"
+  attr :label, :string, default: "Back to home"
+
+  def back_button(assigns) do
     ~H"""
-    <div class="card relative flex flex-row items-center border-2 border-base-300 bg-base-300 rounded-full">
-      <div class="absolute w-1/3 h-full rounded-full border-1 border-base-200 bg-base-100 brightness-200 left-0 [[data-theme=light]_&]:left-1/3 [[data-theme=dark]_&]:left-2/3 transition-[left]" />
+    <.link navigate={@to} class="back-link" data-role="back-button">
+      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 6l-6 6 6 6" />
+      </svg>
+      <span>{@label}</span>
+    </.link>
+    """
+  end
 
+  @doc """
+  Segmented theme switcher: light / dark / system. The pill indicator
+  comes from CSS that targets [data-theme=…] on <html>, so no JS state
+  is needed — `phx:set-theme` flips the attribute and storage entry.
+  """
+  def theme_switch(assigns) do
+    ~H"""
+    <div class="theme-switch" role="group" aria-label="Theme">
       <button
-        class="flex p-2 cursor-pointer w-1/3"
-        phx-click={JS.dispatch("phx:set-theme")}
-        data-phx-theme="system"
-      >
-        <.icon name="hero-computer-desktop-micro" class="size-4 opacity-75 hover:opacity-100" />
-      </button>
-
-      <button
-        class="flex p-2 cursor-pointer w-1/3"
+        type="button"
+        aria-label="Light"
         phx-click={JS.dispatch("phx:set-theme")}
         data-phx-theme="light"
       >
-        <.icon name="hero-sun-micro" class="size-4 opacity-75 hover:opacity-100" />
+        <.icon name="hero-sun-micro" class="size-4" />
       </button>
-
       <button
-        class="flex p-2 cursor-pointer w-1/3"
+        type="button"
+        aria-label="Dark"
         phx-click={JS.dispatch("phx:set-theme")}
         data-phx-theme="dark"
       >
-        <.icon name="hero-moon-micro" class="size-4 opacity-75 hover:opacity-100" />
+        <.icon name="hero-moon-micro" class="size-4" />
+      </button>
+      <button
+        type="button"
+        aria-label="High contrast"
+        phx-click={JS.dispatch("phx:set-theme")}
+        data-phx-theme="system"
+      >
+        <.icon name="hero-eye-micro" class="size-4" />
       </button>
     </div>
     """
   end
+
+  defp user_initial(%{email: email}) do
+    email |> to_string() |> String.first() |> Kernel.||("?") |> String.upcase()
+  end
+
+  defp user_initial(_), do: "?"
 end

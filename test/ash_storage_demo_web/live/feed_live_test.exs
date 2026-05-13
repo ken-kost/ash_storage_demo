@@ -13,7 +13,7 @@ defmodule AshStorageDemoWeb.FeedLiveTest do
   test "renders the post composer and empty-feed message", %{conn: conn} do
     {:ok, view, html} = live(conn, ~p"/feed")
     assert html =~ "Feed"
-    assert html =~ "No posts yet"
+    assert html =~ "no posts yet"
     assert has_element?(view, "[data-role='back-button']")
     assert has_element?(view, "button", "Post")
   end
@@ -48,5 +48,26 @@ defmodule AshStorageDemoWeb.FeedLiveTest do
     assert html =~ "with doc"
     assert html =~ "notes.txt"
     assert has_element?(view, "button", "Unlink")
+  end
+
+  test "renders Copy-link buttons and a link to the public feed", %{conn: conn, user: user} do
+    Fixtures.post(user, "shareable")
+
+    {:ok, view, _} = live(conn, ~p"/feed")
+
+    assert has_element?(view, "[data-role='feed-copy-link']")
+    assert has_element?(view, "[data-role='post-copy-link']")
+    assert has_element?(view, "[data-role='view-public-feed']")
+    assert has_element?(view, "[data-role='post-open-link'][href='/p/" <> "#{Enum.at(Ash.read!(Post, authorize?: false), 0).id}']")
+  end
+
+  test "copy-link event sets the flash so the toast pill renders", %{conn: conn, user: user} do
+    Fixtures.post(user, "shareable")
+
+    {:ok, view, _} = live(conn, ~p"/feed")
+
+    render_click(element(view, "[data-role='feed-copy-link']"))
+
+    assert render(view) =~ "Link copied to clipboard"
   end
 end

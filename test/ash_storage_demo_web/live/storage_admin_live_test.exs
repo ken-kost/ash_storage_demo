@@ -28,7 +28,7 @@ defmodule AshStorageDemoWeb.StorageAdminLiveTest do
         content_type: "text/plain"
       )
 
-    {:ok, view, html} = live(conn, ~p"/storage-admin")
+    {:ok, _view, html} = live(conn, ~p"/storage-admin")
     assert html =~ "k.txt"
 
     {:ok, _} = Operations.detach(p, :documents, blob_id: blob.id)
