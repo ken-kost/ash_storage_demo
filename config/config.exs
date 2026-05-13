@@ -65,7 +65,12 @@ config :spark,
 config :ash_storage_demo,
   ecto_repos: [AshStorageDemo.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [AshStorageDemo.Accounts, AshStorageDemo.Storage, AshStorageDemo.Feed],
+  ash_domains: [
+    AshStorageDemo.Accounts,
+    AshStorageDemo.Storage,
+    AshStorageDemo.Feed,
+    AshStorageDemo.Messaging
+  ],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
 # Defaults for the AshStorage S3 service. Compile-time so the resource DSL can

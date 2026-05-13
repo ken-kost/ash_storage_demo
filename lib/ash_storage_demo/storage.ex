@@ -8,5 +8,6 @@ defmodule AshStorageDemo.Storage do
   resources do
     resource AshStorageDemo.Storage.Blob
     resource AshStorageDemo.Storage.Attachment
+    resource AshStorageDemo.Storage.StickerAttachment
   end
 end
