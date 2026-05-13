@@ -23,6 +23,8 @@ defmodule AshStorageDemo.Feed.Post do
     has_one_attached :cover_image do
       analyzer(AshStorageDemo.Analyzers.FileInfo)
       analyzer(AshStorageDemo.Analyzers.ImageDimensions)
+
+      variant(:feed_size, {AshStorageDemo.Variants.Image, width: 1200}, generate: :oban)
     end
 
     has_many_attached :photos do
@@ -37,10 +39,15 @@ defmodule AshStorageDemo.Feed.Post do
           gps_lng: :gps_lng
         ]
       )
+
+      # generate: :on_demand is the default — first URL load triggers it.
+      variant(:thumb, {AshStorageDemo.Variants.Image, width: 300})
     end
 
     has_many_attached :videos do
       analyzer(AshStorageDemo.Analyzers.FileInfo)
+
+      variant(:poster, {AshStorageDemo.Variants.VideoPoster, at: 1.0})
     end
 
     has_many_attached :documents do
@@ -51,6 +58,8 @@ defmodule AshStorageDemo.Feed.Post do
       dependent(:detach)
 
       analyzer(AshStorageDemo.Analyzers.FileInfo)
+
+      variant(:preview, {AshStorageDemo.Variants.PdfPreview, width: 400})
     end
   end
 

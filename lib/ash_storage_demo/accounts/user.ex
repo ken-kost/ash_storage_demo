@@ -49,6 +49,18 @@ defmodule AshStorageDemo.Accounts.User do
       analyzer(AshStorageDemo.Analyzers.FileInfo)
       analyzer(AshStorageDemo.Analyzers.ImageDimensions)
       analyzer(AshStorageDemo.Analyzers.DominantColor)
+
+      variant(:small, {AshStorageDemo.Variants.Image, width: 64, height: 64, crop: :center},
+        generate: :eager
+      )
+
+      variant(:medium, {AshStorageDemo.Variants.Image, width: 256, height: 256, crop: :center},
+        generate: :eager
+      )
+
+      variant(:large, {AshStorageDemo.Variants.Image, width: 1024, height: 1024, crop: :center},
+        generate: :eager
+      )
     end
 
     has_one_attached :cover_photo do
