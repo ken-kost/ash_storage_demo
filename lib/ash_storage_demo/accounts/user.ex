@@ -45,8 +45,16 @@ defmodule AshStorageDemo.Accounts.User do
 
     service({AshStorage.Service.S3, Application.compile_env(:ash_storage_demo, :s3)})
 
-    has_one_attached(:avatar)
-    has_one_attached(:cover_photo)
+    has_one_attached :avatar do
+      analyzer(AshStorageDemo.Analyzers.FileInfo)
+      analyzer(AshStorageDemo.Analyzers.ImageDimensions)
+      analyzer(AshStorageDemo.Analyzers.DominantColor)
+    end
+
+    has_one_attached :cover_photo do
+      analyzer(AshStorageDemo.Analyzers.FileInfo)
+      analyzer(AshStorageDemo.Analyzers.ImageDimensions)
+    end
   end
 
   actions do

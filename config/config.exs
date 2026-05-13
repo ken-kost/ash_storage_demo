@@ -13,7 +13,12 @@ config :ash_oban, pro?: false
 config :ash_storage_demo, Oban,
   engine: Oban.Engines.Basic,
   notifier: Oban.Notifiers.Postgres,
-  queues: [default: 10],
+  queues: [
+    default: 10,
+    blob_purge_blob: 5,
+    blob_run_pending_analyzers: 5,
+    blob_run_pending_variants: 5
+  ],
   repo: AshStorageDemo.Repo,
   plugins: [{Oban.Plugins.Cron, []}]
 

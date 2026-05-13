@@ -152,6 +152,13 @@ defmodule AshStorageDemoWeb.FeedLive do
   defp format_error(%Ash.Error.Invalid{} = err), do: Exception.message(err)
   defp format_error(other), do: inspect(other)
 
+  defp mime_badge(blob) do
+    # Prefer the detected content_type from the FileInfo analyzer when it
+    # disagrees with the upload header — that's the whole point of sniffing.
+    detected = blob.metadata && blob.metadata["detected_content_type"]
+    detected || blob.content_type || "unknown"
+  end
+
   @impl true
   def render(assigns) do
     ~H"""
@@ -248,7 +255,10 @@ defmodule AshStorageDemoWeb.FeedLive do
             <span>Documents ({length(post.documents)})</span>
             <ul class="space-y-1">
               <li :for={doc <- post.documents} class="flex items-center justify-between gap-2">
-                <a href={doc.url} class="link" target="_blank">{doc.blob.filename}</a>
+                <span class="flex items-center gap-2">
+                  <a href={doc.url} class="link" target="_blank">{doc.blob.filename}</a>
+                  <span class="badge badge-sm badge-outline">{mime_badge(doc.blob)}</span>
+                </span>
                 <button
                   type="button"
                   class="btn btn-ghost btn-xs"

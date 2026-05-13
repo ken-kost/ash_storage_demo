@@ -7,7 +7,12 @@ defmodule AshStorageDemoWeb.ProfileLive do
   def mount(_params, _session, socket) do
     user =
       socket.assigns.current_user
-      |> Ash.load!([:avatar, :avatar_url, :cover_photo, :cover_photo_url])
+      |> Ash.load!([
+        :avatar_url,
+        :cover_photo_url,
+        avatar: :blob,
+        cover_photo: :blob
+      ])
 
     {:ok,
      socket
@@ -72,10 +77,21 @@ defmodule AshStorageDemoWeb.ProfileLive do
   defp reload_user(socket) do
     user =
       socket.assigns.user
-      |> Ash.load!([:avatar, :avatar_url, :cover_photo, :cover_photo_url], reuse_values?: false)
+      |> Ash.load!(
+        [
+          :avatar_url,
+          :cover_photo_url,
+          avatar: :blob,
+          cover_photo: :blob
+        ],
+        reuse_values?: false
+      )
 
     assign(socket, user: user)
   end
+
+  defp dominant_color(%{blob: %{metadata: %{"dominant_color" => hex}}}), do: hex
+  defp dominant_color(_), do: nil
 
   defp format_field("avatar"), do: "Avatar"
   defp format_field("cover_photo"), do: "Cover photo"
@@ -100,6 +116,7 @@ defmodule AshStorageDemoWeb.ProfileLive do
           upload={@uploads.avatar}
           url={@user.avatar_url}
           field="avatar"
+          tint={dominant_color(@user.avatar)}
         />
 
         <.attachment_panel
@@ -117,12 +134,16 @@ defmodule AshStorageDemoWeb.ProfileLive do
   attr :upload, :any, required: true
   attr :url, :string, default: nil
   attr :field, :string, required: true
+  attr :tint, :string, default: nil
 
   defp attachment_panel(assigns) do
     ~H"""
     <article class="rounded-box border border-base-300 p-6 space-y-4">
       <header class="flex items-center justify-between">
         <h2 class="text-xl font-semibold">{@title}</h2>
+        <span :if={@tint} class="badge badge-sm" style={"background-color: " <> @tint}>
+          {@tint}
+        </span>
         <div :if={@url} class="flex items-center gap-2">
           <a href={@url} class="link link-primary text-sm" target="_blank">View current</a>
           <button
