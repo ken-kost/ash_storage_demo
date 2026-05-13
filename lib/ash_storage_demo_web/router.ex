@@ -34,6 +34,7 @@ defmodule AshStorageDemoWeb.Router do
       on_mount: [{AshStorageDemoWeb.LiveUserAuth, :live_user_required}] do
       live "/profile", ProfileLive
       live "/feed", FeedLive
+      live "/storage-admin", StorageAdminLive
     end
   end
 

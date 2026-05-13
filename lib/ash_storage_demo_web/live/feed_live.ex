@@ -1,6 +1,7 @@
 defmodule AshStorageDemoWeb.FeedLive do
   use AshStorageDemoWeb, :live_view
 
+  import AshStorageDemoWeb.StorageComponents
   alias AshStorage.Operations
   alias AshStorageDemo.Feed.Post
 
@@ -251,23 +252,38 @@ defmodule AshStorageDemoWeb.FeedLive do
             </ul>
           </div>
 
+          <dl
+            :if={post.taken_at || post.camera || post.gps_lat}
+            class="text-xs grid grid-cols-[max-content_1fr] gap-x-3"
+          >
+            <dt :if={post.taken_at} class="font-medium">Taken at</dt>
+            <dd :if={post.taken_at}>{post.taken_at}</dd>
+            <dt :if={post.camera} class="font-medium">Camera</dt>
+            <dd :if={post.camera}>{post.camera}</dd>
+            <dt :if={post.gps_lat} class="font-medium">GPS</dt>
+            <dd :if={post.gps_lat}>{post.gps_lat}, {post.gps_lng}</dd>
+          </dl>
+
           <div :if={post.documents != []} class="space-y-1 text-sm">
             <span>Documents ({length(post.documents)})</span>
             <ul class="space-y-1">
-              <li :for={doc <- post.documents} class="flex items-center justify-between gap-2">
-                <span class="flex items-center gap-2">
-                  <a href={doc.url} class="link" target="_blank">{doc.blob.filename}</a>
-                  <span class="badge badge-sm badge-outline">{mime_badge(doc.blob)}</span>
-                </span>
-                <button
-                  type="button"
-                  class="btn btn-ghost btn-xs"
-                  phx-click="detach-document"
-                  phx-value-post-id={post.id}
-                  phx-value-blob-id={doc.blob.id}
-                >
-                  Unlink
-                </button>
+              <li :for={doc <- post.documents} class="flex flex-col gap-1">
+                <div class="flex items-center justify-between gap-2">
+                  <span class="flex items-center gap-2">
+                    <a href={doc.url} class="link" target="_blank">{doc.blob.filename}</a>
+                    <span class="badge badge-sm badge-outline">{mime_badge(doc.blob)}</span>
+                  </span>
+                  <button
+                    type="button"
+                    class="btn btn-ghost btn-xs"
+                    phx-click="detach-document"
+                    phx-value-post-id={post.id}
+                    phx-value-blob-id={doc.blob.id}
+                  >
+                    Unlink
+                  </button>
+                </div>
+                <.analyzer_pills blob={doc.blob} />
               </li>
             </ul>
           </div>
