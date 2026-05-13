@@ -68,6 +68,17 @@ config :ash_storage_demo,
   ash_domains: [AshStorageDemo.Accounts, AshStorageDemo.Storage],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
+# Defaults for the AshStorage S3 service. Compile-time so the resource DSL can
+# capture it via Application.compile_env/2. config/runtime.exs re-applies the
+# same shape so env-driven prod overrides land in Application.get_env, which
+# AshStorage's per-resource info lookup also consults at runtime.
+config :ash_storage_demo, :s3,
+  bucket: "ash-storage-demo",
+  region: "us-east-1",
+  access_key_id: "minioadmin",
+  secret_access_key: "minioadmin",
+  endpoint_url: "http://localhost:19000"
+
 # Configure the endpoint
 config :ash_storage_demo, AshStorageDemoWeb.Endpoint,
   url: [host: "localhost"],

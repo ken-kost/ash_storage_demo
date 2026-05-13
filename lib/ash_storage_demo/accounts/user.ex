@@ -4,7 +4,7 @@ defmodule AshStorageDemo.Accounts.User do
     domain: AshStorageDemo.Accounts,
     data_layer: AshPostgres.DataLayer,
     authorizers: [Ash.Policy.Authorizer],
-    extensions: [AshAuthentication]
+    extensions: [AshAuthentication, AshStorage]
 
   authentication do
     add_ons do
@@ -37,6 +37,16 @@ defmodule AshStorageDemo.Accounts.User do
   postgres do
     table "users"
     repo AshStorageDemo.Repo
+  end
+
+  storage do
+    blob_resource(AshStorageDemo.Storage.Blob)
+    attachment_resource(AshStorageDemo.Storage.Attachment)
+
+    service({AshStorage.Service.S3, Application.compile_env(:ash_storage_demo, :s3)})
+
+    has_one_attached(:avatar)
+    has_one_attached(:cover_photo)
   end
 
   actions do

@@ -29,6 +29,11 @@ defmodule AshStorageDemoWeb.Router do
       on_mount: [{AshStorageDemoWeb.LiveUserAuth, :live_user_optional}] do
       live "/", HomeLive
     end
+
+    ash_authentication_live_session :require_authenticated,
+      on_mount: [{AshStorageDemoWeb.LiveUserAuth, :live_user_required}] do
+      live "/profile", ProfileLive
+    end
   end
 
   scope "/", AshStorageDemoWeb do
