@@ -23,6 +23,16 @@ end
 config :ash_storage_demo, AshStorageDemoWeb.Endpoint,
   http: [port: String.to_integer(System.get_env("PORT", "4000"))]
 
+# Default S3-backed config for AshStorage services. In dev this points at the
+# local MinIO container from docker-compose.yml; production overrides the env
+# vars to point at a real S3 bucket.
+config :ash_storage_demo, :s3,
+  bucket: System.get_env("S3_BUCKET", "ash-storage-demo"),
+  region: System.get_env("S3_REGION", "us-east-1"),
+  access_key_id: System.get_env("S3_KEY", "minioadmin"),
+  secret_access_key: System.get_env("S3_SECRET", "minioadmin"),
+  endpoint_url: System.get_env("S3_ENDPOINT", "http://localhost:19000")
+
 if config_env() == :prod do
   database_url =
     System.get_env("DATABASE_URL") ||

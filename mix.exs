@@ -57,6 +57,13 @@ defmodule AshStorageDemo.MixProject do
       {:ash_postgres, "~> 2.0"},
       {:ash_phoenix, "~> 2.0"},
       {:ash, "~> 3.0"},
+      {:ash_storage, github: "ash-project/ash_storage"},
+      {:req_s3, "~> 0.2"},
+      {:image, "~> 0.54"},
+      {:vix, "~> 0.31"},
+      {:ex_image_info, "~> 0.2 or ~> 1.0"},
+      {:exexif, "~> 0.0.5"},
+      {:ffmpex, "~> 0.11"},
       {:igniter, "~> 0.6", only: [:dev, :test]},
       {:phoenix, "~> 1.8.7"},
       {:phoenix_ecto, "~> 4.5"},
@@ -110,30 +117,31 @@ defmodule AshStorageDemo.MixProject do
     ]
   end
 
-
-      defp usage_rules do
-        # Example for those using claude.
-        [
-          file: "CLAUDE.md",
-          # rules to include directly in CLAUDE.md
-          usage_rules: ["usage_rules:all"],
-          skills: [
-            location: ".claude/skills",
-            # build skills that combine multiple usage rules
-            build: [
-              "ash-framework": [
-                # The description tells people how to use this skill.
-                description: "Use this skill working with Ash Framework or any of its extensions. Always consult this when making any domain changes, features or fixes.",
-                # Include all Ash dependencies
-                usage_rules: [:ash, ~r/^ash_/]
-              ],
-              "phoenix-framework": [
-                description: "Use this skill working with Phoenix Framework. Consult this when working with the web layer, controllers, views, liveviews etc.",
-                # Include all Phoenix dependencies
-                usage_rules: [:phoenix, ~r/^phoenix_/]
-              ]
-            ]
+  defp usage_rules do
+    # Example for those using claude.
+    [
+      file: "CLAUDE.md",
+      # rules to include directly in CLAUDE.md
+      usage_rules: ["usage_rules:all"],
+      skills: [
+        location: ".claude/skills",
+        # build skills that combine multiple usage rules
+        build: [
+          "ash-framework": [
+            # The description tells people how to use this skill.
+            description:
+              "Use this skill working with Ash Framework or any of its extensions. Always consult this when making any domain changes, features or fixes.",
+            # Include all Ash dependencies
+            usage_rules: [:ash, ~r/^ash_/]
+          ],
+          "phoenix-framework": [
+            description:
+              "Use this skill working with Phoenix Framework. Consult this when working with the web layer, controllers, views, liveviews etc.",
+            # Include all Phoenix dependencies
+            usage_rules: [:phoenix, ~r/^phoenix_/]
           ]
         ]
-      end
+      ]
+    ]
+  end
 end
