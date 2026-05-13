@@ -74,7 +74,8 @@ config :ash_storage_demo,
     AshStorageDemo.Accounts,
     AshStorageDemo.Storage,
     AshStorageDemo.Feed,
-    AshStorageDemo.Messaging
+    AshStorageDemo.Messaging,
+    AshStorageDemo.Tagging
   ],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
