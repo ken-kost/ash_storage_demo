@@ -408,15 +408,13 @@ config :ash_storage_demo, AshStorageDemo.Feed.Post,
 
 ---
 
-## 7. Open questions for Zach / the group
+## 7. Open questions for Zach / the group — answered
 
-These are worth raising before sinking time:
-
-1. **Polymorphic attachment in the same Attachment table?** README hints multi-FK and pure-polymorphic are mutually exclusive per attachment resource. The plan uses two tables. Confirm that's the intended pattern.
-2. **Variant chain caching** — when `generate: :on_demand`, where is the rendered output stored? Same service as the source, or a configurable cache service? The demo should pick one and document it.
-3. **`write_attributes` from an `:oban` analyzer** — does the parent resource get a normal update action call, or a direct attribute write? Affects how policies on the parent interact.
-4. **Soft-destroy + variants** — README says soft destroy skips dependent handling; should variants of a soft-destroyed parent become unreachable, or keep serving? UI behaviour depends on this.
-5. **Service.Test + variants** — does the test service synthesise variant blobs, or are they no-ops? Tests in Phase 9 will surface this.
+1. **Polymorphic attachment in the same Attachment table?** **Confirmed** — multi-FK and pure-polymorphic are mutually exclusive per attachment resource. The demo uses two attachment tables (`Storage.Attachment` for multi-FK, `Storage.PolyAttachment` for pure-poly).
+2. **Variant chain caching** — when `generate: :on_demand`, the rendered output is stored on the **same service as the source** blob. No separate cache service config required.
+3. **`write_attributes` from an `:oban` analyzer** — the parent resource gets a **normal update action call**, so the parent's policies must permit the write. Plan accordingly (dedicated bypass update action, or system-actor permissions).
+4. **Soft-destroy + variants** — variants of a soft-destroyed parent become **unreachable** (the soft-destroy skips dependent handling, but the variant URL paths must 404). UI in Phase 8 enforces this.
+5. **Service.Test + variants** — `Service.Test` **synthesises** variant blobs, so tests can assert variant URLs and metadata just like a live run.
 
 ---
 
