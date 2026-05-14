@@ -88,6 +88,13 @@ if config_env() == :prod do
       ]
     ]
 
+  # Mirror the same disk roots into `:disk_storage` so the router's
+  # `DiskServeRuntime` plug serves bytes from the Fly volume, not the
+  # compiled-in dev defaults.
+  config :ash_storage_demo, :disk_storage,
+    documents: Path.join(disk_root, "documents"),
+    cover_images_mirror: Path.join(disk_root, "cover_images_mirror")
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """

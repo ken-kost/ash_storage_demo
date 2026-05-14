@@ -40,10 +40,14 @@ defmodule AshStorageDemoWeb.Router do
     end
   end
 
-  forward "/files/documents", AshStorage.Plug.DiskServe, root: "priv/storage/documents"
+  # Route through `DiskServeRuntime` so the on-disk root is resolved at request
+  # time from `:disk_storage` Application env. In prod the config/runtime.exs
+  # block sets that to `$DISK_STORAGE_ROOT/...` (a Fly volume mount); in dev it
+  # falls back to `priv/storage/...`.
+  forward "/files/documents", AshStorageDemoWeb.DiskServeRuntime, name: :documents
 
-  forward "/files/cover_images_mirror", AshStorage.Plug.DiskServe,
-    root: "priv/storage/cover_images_mirror"
+  forward "/files/cover_images_mirror", AshStorageDemoWeb.DiskServeRuntime,
+    name: :cover_images_mirror
 
   forward "/media", AshStorage.Plug.Proxy,
     service: {AshStorage.Service.S3, Application.compile_env(:ash_storage_demo, :s3)}

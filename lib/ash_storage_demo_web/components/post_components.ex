@@ -130,8 +130,14 @@ defmodule AshStorageDemoWeb.PostComponents do
         <div class="post-section-head">
           <span>Videos <em>({length(@post.videos)})</em></span>
         </div>
-        <ul class="doc-list">
+        <ul class="video-list">
           <li :for={vid <- @post.videos}>
+            <video
+              class="post-video"
+              controls
+              preload="metadata"
+              src={vid.url}
+            />
             <div class="doc-row">
               <a class="doc-link" href={vid.url} target="_blank">
                 <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7">

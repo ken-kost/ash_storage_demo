@@ -99,6 +99,13 @@ config :ash_storage_demo, :s3,
   # one hour, which is fine for per-render avatar links.
   presigned: true
 
+# Disk roots used by `AshStorageDemoWeb.DiskServeRuntime`. The runtime.exs prod
+# block overrides these to point at the mounted Fly volume via
+# `DISK_STORAGE_ROOT`; here we default to the dev/test paths under priv/.
+config :ash_storage_demo, :disk_storage,
+  documents: "priv/storage/documents",
+  cover_images_mirror: "priv/storage/cover_images_mirror"
+
 # Configure the endpoint
 config :ash_storage_demo, AshStorageDemoWeb.Endpoint,
   url: [host: "localhost"],
