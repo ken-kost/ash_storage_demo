@@ -29,6 +29,10 @@ kill_signal = 'SIGTERM'
     hard_limit = 1000
     soft_limit = 1000
 
+[[mounts]]
+  source = 'app_storage'
+  destination = '/data'
+
 [[vm]]
   memory = '1gb'
   cpu_kind = 'shared'

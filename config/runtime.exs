@@ -57,25 +57,32 @@ if config_env() == :prod do
   config :ash_storage_demo, AshStorageDemo.Messaging.Message, prod_s3_storage
   config :ash_storage_demo, AshStorageDemo.Tagging.Tag, prod_s3_storage
 
-  # Post needs a per-attachment override for cover_image (which mixes S3 with a
-  # Disk mirror in the DSL). The other attachments (photos / videos) inherit the
-  # resource-level S3 override; documents stays on Disk via its own DSL service.
+  # Post needs per-attachment overrides for the two Disk-using attachments:
+  # `cover_image` (S3 primary + Disk mirror) and `documents` (Disk only). Both
+  # write under DISK_STORAGE_ROOT so a Fly volume mounted at e.g. /data/storage
+  # keeps the bytes across redeploys instead of landing on the container's
+  # ephemeral filesystem. `photos` / `videos` inherit the resource-level S3
+  # override above.
+  disk_root = System.get_env("DISK_STORAGE_ROOT", "priv/storage")
+
+  cover_images_mirror_disk =
+    {AshStorage.Service.Disk,
+     root: Path.join(disk_root, "cover_images_mirror"), base_url: "/files/cover_images_mirror"}
+
+  documents_disk =
+    {AshStorage.Service.Disk,
+     root: Path.join(disk_root, "documents"), base_url: "/files/documents"}
+
   config :ash_storage_demo, AshStorageDemo.Feed.Post,
     storage: [
       service: {AshStorage.Service.S3, prod_s3_opts},
       has_one_attached: [
         cover_image: [
-          service:
-            {AshStorage.Service.S3,
-             prod_s3_opts ++
-               [
-                 mirrors: [
-                   {AshStorage.Service.Disk,
-                    root: "priv/storage/cover_images_mirror",
-                    base_url: "/files/cover_images_mirror"}
-                 ]
-               ]}
+          service: {AshStorage.Service.S3, prod_s3_opts ++ [mirrors: [cover_images_mirror_disk]]}
         ]
+      ],
+      has_many_attached: [
+        documents: [service: documents_disk]
       ]
     ]
 
