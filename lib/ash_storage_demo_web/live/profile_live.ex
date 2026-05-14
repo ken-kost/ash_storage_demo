@@ -53,7 +53,6 @@ defmodule AshStorageDemoWeb.ProfileLive do
         {:noreply, socket |> put_flash(:info, "#{format_field(field)} updated") |> reload_user()}
 
       [{:error, error}] ->
-        dbg(error)
         {:noreply, put_flash(socket, :error, format_error(error))}
 
       [] ->

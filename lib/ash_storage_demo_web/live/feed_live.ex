@@ -53,7 +53,7 @@ defmodule AshStorageDemoWeb.FeedLive do
     actor = socket.assigns.current_user
 
     with {:ok, post} <- Ash.create(Post, %{body: body}, actor: actor),
-         {:ok, post} <- attach_uploads(socket, post) do
+         {:ok, post} <- attach_uploads(socket, post, actor) do
       {:noreply,
        socket
        |> put_flash(:info, "Posted")
@@ -121,12 +121,12 @@ defmodule AshStorageDemoWeb.FeedLive do
     {:noreply, put_flash(socket, :info, "Link copied to clipboard")}
   end
 
-  defp attach_uploads(socket, post) do
+  defp attach_uploads(socket, post, actor) do
     Enum.reduce_while(
       [:cover_image, :photos, :videos, :documents],
       {:ok, post},
       fn slot, {:ok, post} ->
-        case consume_slot(socket, post, slot) do
+        case consume_slot(socket, post, slot, actor) do
           {:ok, post} -> {:cont, {:ok, post}}
           {:error, error} -> {:halt, {:error, error}}
         end
@@ -134,7 +134,7 @@ defmodule AshStorageDemoWeb.FeedLive do
     )
   end
 
-  defp consume_slot(socket, post, slot) do
+  defp consume_slot(socket, post, slot, actor) do
     results =
       consume_uploaded_entries(socket, slot, fn %{path: path}, entry ->
         bytes = File.read!(path)
@@ -142,7 +142,8 @@ defmodule AshStorageDemoWeb.FeedLive do
         {:ok,
          Operations.attach(post, slot, bytes,
            filename: entry.client_name,
-           content_type: entry.client_type
+           content_type: entry.client_type,
+           actor: actor
          )}
       end)
 
