@@ -34,6 +34,51 @@ config :ash_storage_demo, :s3,
   endpoint_url: System.get_env("S3_ENDPOINT", "http://localhost:19000")
 
 if config_env() == :prod do
+  # Per-host Application env overrides for the AshStorage resources. ash_storage's
+  # Info.attachment_service/2 (see deps/ash_storage/lib/ash_storage/info.ex) checks
+  # `Application.fetch_env(otp_app, resource)` before consulting the DSL-baked
+  # `service({...})` tuple, so this is the supported way to swap S3 creds at
+  # runtime without rebuilding the release. The resource DSLs still capture
+  # `Application.compile_env(:ash_storage_demo, :s3)` at build time (with the dev
+  # defaults from config.exs); these overrides win for every host listed below.
+  prod_s3_opts = [
+    bucket: System.fetch_env!("S3_BUCKET"),
+    region: System.get_env("S3_REGION", "us-east-1"),
+    access_key_id: System.fetch_env!("S3_KEY"),
+    secret_access_key: System.fetch_env!("S3_SECRET"),
+    endpoint_url: System.fetch_env!("S3_ENDPOINT")
+  ]
+
+  prod_s3_storage = [storage: [service: {AshStorage.Service.S3, prod_s3_opts}]]
+
+  config :ash_storage_demo, AshStorageDemo.Accounts.User, prod_s3_storage
+  config :ash_storage_demo, AshStorageDemo.Feed.Reaction, prod_s3_storage
+  config :ash_storage_demo, AshStorageDemo.Feed.Story, prod_s3_storage
+  config :ash_storage_demo, AshStorageDemo.Messaging.Message, prod_s3_storage
+  config :ash_storage_demo, AshStorageDemo.Tagging.Tag, prod_s3_storage
+
+  # Post needs a per-attachment override for cover_image (which mixes S3 with a
+  # Disk mirror in the DSL). The other attachments (photos / videos) inherit the
+  # resource-level S3 override; documents stays on Disk via its own DSL service.
+  config :ash_storage_demo, AshStorageDemo.Feed.Post,
+    storage: [
+      service: {AshStorage.Service.S3, prod_s3_opts},
+      has_one_attached: [
+        cover_image: [
+          service:
+            {AshStorage.Service.S3,
+             prod_s3_opts ++
+               [
+                 mirrors: [
+                   {AshStorage.Service.Disk,
+                    root: "priv/storage/cover_images_mirror",
+                    base_url: "/files/cover_images_mirror"}
+                 ]
+               ]}
+        ]
+      ]
+    ]
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """

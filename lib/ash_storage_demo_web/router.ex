@@ -61,39 +61,13 @@ defmodule AshStorageDemoWeb.Router do
     auth_routes AuthController, AshStorageDemo.Accounts.User, path: "/auth"
     sign_out_route AuthController
 
-    # Remove these if you'd like to use your own authentication views
     sign_in_route register_path: "/register",
-                  reset_path: "/reset",
                   auth_routes_prefix: "/auth",
                   on_mount: [{AshStorageDemoWeb.LiveUserAuth, :live_no_user}],
                   overrides: [
                     AshStorageDemoWeb.AuthOverrides,
                     Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
                   ]
-
-    # Remove this if you do not want to use the reset password feature
-    reset_route auth_routes_prefix: "/auth",
-                overrides: [
-                  AshStorageDemoWeb.AuthOverrides,
-                  Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
-                ]
-
-    # Remove this if you do not use the confirmation strategy
-    confirm_route AshStorageDemo.Accounts.User, :confirm_new_user,
-      auth_routes_prefix: "/auth",
-      overrides: [
-        AshStorageDemoWeb.AuthOverrides,
-        Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
-      ]
-
-    # Remove this if you do not use the magic link strategy.
-    magic_sign_in_route(AshStorageDemo.Accounts.User, :magic_link,
-      auth_routes_prefix: "/auth",
-      overrides: [
-        AshStorageDemoWeb.AuthOverrides,
-        Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
-      ]
-    )
   end
 
   # Other scopes may use custom stacks.

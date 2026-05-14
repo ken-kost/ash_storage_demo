@@ -98,6 +98,14 @@ defmodule AshStorageDemoWeb.Layouts do
         >
           Sign in
         </.link>
+        <.link
+          :if={!@current_user}
+          navigate="/register"
+          class="btn btn-outline btn-sm"
+          data-role="nav-register"
+        >
+          Register
+        </.link>
       </nav>
     </header>
 

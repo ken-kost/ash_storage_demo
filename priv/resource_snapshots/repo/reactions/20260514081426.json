@@ -21,7 +21,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "body",
+      "source": "emoji",
       "type": "text"
     },
     {
@@ -49,6 +49,37 @@
       "type": "utc_datetime_usec"
     },
     {
+      "allow_nil?": false,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "name": "reactions_post_id_fkey",
+        "on_delete": "delete",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "posts"
+      },
+      "scale": null,
+      "size": null,
+      "source": "post_id",
+      "type": "uuid"
+    },
+    {
       "allow_nil?": true,
       "default": "nil",
       "generated?": false,
@@ -67,7 +98,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "posts_author_id_fkey",
+        "name": "reactions_author_id_fkey",
         "on_delete": "nilify",
         "on_update": null,
         "primary_key?": true,
@@ -86,7 +117,7 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "779EAD8E1024332B91E1D3FEB345D13910CD77D95359D5742295BD555AE25B24",
+  "hash": "10AFCE6E896FCD16CCBE7F93A778C2A38E7415B2075E4FFFDE9250611D403142",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -95,5 +126,5 @@
   },
   "repo": "Elixir.AshStorageDemo.Repo",
   "schema": null,
-  "table": "posts"
+  "table": "reactions"
 }

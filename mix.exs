@@ -13,7 +13,16 @@ defmodule AshStorageDemo.MixProject do
       compilers: [:phoenix_live_view] ++ Mix.compilers(),
       listeners: [Phoenix.CodeReloader],
       consolidate_protocols: Mix.env() != :dev,
-      usage_rules: usage_rules()
+      usage_rules: usage_rules(),
+      releases: [
+        ash_storage_demo: [
+          # `:s3` is intentionally re-set in runtime.exs from Fly secrets, so it
+          # diverges from the compile-time dev defaults. AshStorage's resource
+          # info lookup consults Application env at runtime regardless of the
+          # DSL-baked tuple, so the divergence is safe — disable the abort.
+          validate_compile_env: false
+        ]
+      ]
     ]
   end
 

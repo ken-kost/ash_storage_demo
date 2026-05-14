@@ -21,35 +21,11 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "body",
+      "source": "name",
       "type": "text"
     },
     {
       "allow_nil?": false,
-      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "inserted_at",
-      "type": "utc_datetime_usec"
-    },
-    {
-      "allow_nil?": false,
-      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "updated_at",
-      "type": "utc_datetime_usec"
-    },
-    {
-      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -67,16 +43,16 @@
           "global": null,
           "strategy": null
         },
-        "name": "messages_sender_id_fkey",
-        "on_delete": "nilify",
+        "name": "storage_sticker_attachments_blob_id_fkey",
+        "on_delete": null,
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "users"
+        "table": "storage_blobs"
       },
       "scale": null,
       "size": null,
-      "source": "sender_id",
+      "source": "blob_id",
       "type": "uuid"
     },
     {
@@ -98,16 +74,16 @@
           "global": null,
           "strategy": null
         },
-        "name": "messages_recipient_id_fkey",
-        "on_delete": "nilify",
+        "name": "storage_sticker_attachments_reaction_id_fkey",
+        "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "users"
+        "table": "reactions"
       },
       "scale": null,
       "size": null,
-      "source": "recipient_id",
+      "source": "reaction_id",
       "type": "uuid"
     }
   ],
@@ -117,7 +93,7 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "DDB3C0407D66D633868855FD955F8448302F2703D6D86DA7D95EAA0CC928D825",
+  "hash": "87483083273864EAD9931AE4C96456600B3CE8668BD08CF2AFF42CDC501BC24D",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -126,5 +102,5 @@
   },
   "repo": "Elixir.AshStorageDemo.Repo",
   "schema": null,
-  "table": "messages"
+  "table": "storage_sticker_attachments"
 }

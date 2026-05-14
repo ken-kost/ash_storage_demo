@@ -81,19 +81,19 @@ config :ash_storage_demo,
     AshStorageDemo.Feed,
     AshStorageDemo.Messaging,
     AshStorageDemo.Tagging
-  ],
-  ash_authentication: [return_error_on_invalid_magic_link_token?: true]
+  ]
 
 # Defaults for the AshStorage S3 service. Compile-time so the resource DSL can
-# capture it via Application.compile_env/2. config/runtime.exs re-applies the
-# same shape so env-driven prod overrides land in Application.get_env, which
-# AshStorage's per-resource info lookup also consults at runtime.
+# capture it via Application.compile_env/2. Values are read from env vars so a
+# release build picks up prod S3 settings via Docker build args; runtime.exs
+# re-applies the same shape so the values are present in Application.get_env
+# at runtime too (avoids Elixir's compile-vs-runtime mismatch abort).
 config :ash_storage_demo, :s3,
-  bucket: "ash-storage-demo",
-  region: "us-east-1",
-  access_key_id: "minioadmin",
-  secret_access_key: "minioadmin",
-  endpoint_url: "http://localhost:19000"
+  bucket: System.get_env("S3_BUCKET", "ash-storage-demo"),
+  region: System.get_env("S3_REGION", "us-east-1"),
+  access_key_id: System.get_env("S3_KEY", "minioadmin"),
+  secret_access_key: System.get_env("S3_SECRET", "minioadmin"),
+  endpoint_url: System.get_env("S3_ENDPOINT", "http://localhost:19000")
 
 # Configure the endpoint
 config :ash_storage_demo, AshStorageDemoWeb.Endpoint,

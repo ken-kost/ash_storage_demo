@@ -7,7 +7,6 @@ defmodule AshStorageDemo.StorageTest do
   use AshStorageDemo.DataCase, async: false
 
   alias AshStorage.Operations
-  alias AshStorageDemo.Accounts.User
   alias AshStorageDemo.Feed.{Comment, Post, Reaction, Story}
   alias AshStorageDemo.Messaging.Message
   alias AshStorageDemo.Tagging.Tag
@@ -15,10 +14,7 @@ defmodule AshStorageDemo.StorageTest do
   setup do
     AshStorage.Service.Test.reset!()
 
-    {:ok, user} =
-      Ash.Seed.seed!(%User{email: "alice@example.com"})
-      |> then(&{:ok, &1})
-
+    user = user(email: "alice@example.com")
     {:ok, post} = Ash.create(Post, %{body: "hello"}, actor: user, authorize?: false)
     {:ok, user: user, post: post}
   end

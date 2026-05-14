@@ -21,39 +21,32 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "name",
-      "type": "text"
+      "source": "expires_at",
+      "type": "utc_datetime_usec"
     },
     {
       "allow_nil?": false,
-      "default": "nil",
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
-      "references": {
-        "deferrable": false,
-        "destination_attribute": "id",
-        "destination_attribute_default": null,
-        "destination_attribute_generated": null,
-        "index?": false,
-        "match_type": null,
-        "match_with": null,
-        "multitenancy": {
-          "attribute": null,
-          "global": null,
-          "strategy": null
-        },
-        "name": "storage_sticker_attachments_blob_id_fkey",
-        "on_delete": null,
-        "on_update": null,
-        "primary_key?": true,
-        "schema": "public",
-        "table": "storage_blobs"
-      },
+      "references": null,
       "scale": null,
       "size": null,
-      "source": "blob_id",
-      "type": "uuid"
+      "source": "inserted_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "updated_at",
+      "type": "utc_datetime_usec"
     },
     {
       "allow_nil?": true,
@@ -74,16 +67,16 @@
           "global": null,
           "strategy": null
         },
-        "name": "storage_sticker_attachments_reaction_id_fkey",
-        "on_delete": "delete",
+        "name": "stories_author_id_fkey",
+        "on_delete": "nilify",
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "reactions"
+        "table": "users"
       },
       "scale": null,
       "size": null,
-      "source": "reaction_id",
+      "source": "author_id",
       "type": "uuid"
     }
   ],
@@ -93,7 +86,7 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "09133D6F01AEA63A4C80283E9E7804999A5DE1D4D1CF0A7471B157E1FADAAF9C",
+  "hash": "3A79AB3DC3683C398514EBBE7D5247C9D077EFC82BBC8849140F403531EC77F6",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -102,5 +95,5 @@
   },
   "repo": "Elixir.AshStorageDemo.Repo",
   "schema": null,
-  "table": "storage_sticker_attachments"
+  "table": "stories"
 }

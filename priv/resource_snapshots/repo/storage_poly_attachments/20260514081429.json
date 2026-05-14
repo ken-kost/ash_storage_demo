@@ -21,35 +21,35 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "expires_at",
-      "type": "utc_datetime_usec"
+      "source": "name",
+      "type": "text"
     },
     {
       "allow_nil?": false,
-      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "default": "nil",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "inserted_at",
-      "type": "utc_datetime_usec"
+      "source": "record_type",
+      "type": "text"
     },
     {
       "allow_nil?": false,
-      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "default": "nil",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "updated_at",
-      "type": "utc_datetime_usec"
+      "source": "record_id",
+      "type": "text"
     },
     {
-      "allow_nil?": true,
+      "allow_nil?": false,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -67,16 +67,16 @@
           "global": null,
           "strategy": null
         },
-        "name": "stories_author_id_fkey",
-        "on_delete": "nilify",
+        "name": "storage_poly_attachments_blob_id_fkey",
+        "on_delete": null,
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "users"
+        "table": "storage_blobs"
       },
       "scale": null,
       "size": null,
-      "source": "author_id",
+      "source": "blob_id",
       "type": "uuid"
     }
   ],
@@ -86,7 +86,7 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "43A54CDBE05A2BE477219390C6B47B9E5331AD71714CDF318E2DB226FF01EE85",
+  "hash": "A637F74B60B80055DBDB327AE3BD339AEBFA1EC427FB0E00983016F3A1BD5219",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -95,5 +95,5 @@
   },
   "repo": "Elixir.AshStorageDemo.Repo",
   "schema": null,
-  "table": "stories"
+  "table": "storage_poly_attachments"
 }

@@ -19,7 +19,8 @@ defmodule AshStorageDemo.Fixtures do
 
   def user(opts \\ []) do
     email = Keyword.get(opts, :email, unique_email())
-    Ash.Seed.seed!(%User{email: email})
+    hashed_password = Bcrypt.hash_pwd_salt("password123!")
+    Ash.Seed.seed!(%User{email: email, hashed_password: hashed_password})
   end
 
   def unique_email, do: "u-#{System.unique_integer([:positive])}@example.test"
