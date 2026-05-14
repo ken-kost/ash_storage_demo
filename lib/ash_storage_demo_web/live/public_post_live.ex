@@ -16,14 +16,16 @@ defmodule AshStorageDemoWeb.PublicPostLive do
     photos: [:url, :blob],
     videos: [:url, :blob],
     documents: [:url, :blob],
-    author: [:email]
+    author: [:email, :avatar_small_url]
   ]
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    case Ash.get(Post, id, authorize?: false) do
+    actor = socket.assigns[:current_user]
+
+    case Ash.get(Post, id, actor: actor) do
       {:ok, post} ->
-        post = Ash.load!(post, @load_spec, authorize?: false)
+        post = Ash.load!(post, @load_spec, actor: actor)
 
         {:ok,
          socket

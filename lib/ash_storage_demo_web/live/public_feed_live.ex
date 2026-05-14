@@ -19,17 +19,23 @@ defmodule AshStorageDemoWeb.PublicFeedLive do
     photos: [:url, :blob],
     videos: [:url, :blob],
     documents: [:url, :blob],
-    author: [:email]
+    author: [:email, :avatar_small_url]
   ]
+
+  @user_load_spec [:avatar_medium_url, :cover_photo_url]
 
   @impl true
   def mount(%{"id" => id}, _session, socket) do
-    case Ash.get(User, id, authorize?: false) do
+    actor = socket.assigns[:current_user]
+
+    case Ash.get(User, id, actor: actor) do
       {:ok, user} ->
+        user = Ash.load!(user, @user_load_spec, actor: actor)
+
         {:ok,
          socket
          |> assign(:page_title, "@" <> to_string(user.email))
-         |> assign(user: user, posts: load_posts(user))}
+         |> assign(user: user, posts: load_posts(user, actor))}
 
       _ ->
         {:ok,
@@ -44,13 +50,13 @@ defmodule AshStorageDemoWeb.PublicFeedLive do
     {:noreply, put_flash(socket, :info, "Link copied to clipboard")}
   end
 
-  defp load_posts(user) do
+  defp load_posts(user, actor) do
     Post
     |> Ash.Query.filter(author_id == ^user.id)
     |> Ash.Query.sort(inserted_at: :desc)
-    |> Ash.read!(page: [limit: 50, count: false], authorize?: false)
+    |> Ash.read!(page: [limit: 50, count: false], actor: actor)
     |> page_results()
-    |> Ash.load!(@load_spec, authorize?: false)
+    |> Ash.load!(@load_spec, actor: actor)
   end
 
   defp page_results(%{results: results}), do: results
@@ -63,6 +69,20 @@ defmodule AshStorageDemoWeb.PublicFeedLive do
     ~H"""
     <Layouts.app flash={@flash} current_user={@current_user}>
       <Layouts.back_button />
+      <div
+        :if={@user.cover_photo_url}
+        class="feed-cover"
+        data-role="feed-cover"
+        style={"background-image: url('#{@user.cover_photo_url}');"}
+      >
+        <span
+          :if={@user.avatar_medium_url}
+          class="feed-cover-avatar"
+          data-role="feed-cover-avatar"
+        >
+          <img src={@user.avatar_medium_url} alt="" />
+        </span>
+      </div>
       <div class="page-head">
         <h1>{to_string(@user.email)}</h1>
         <p class="page-sub">

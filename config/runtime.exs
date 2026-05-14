@@ -31,7 +31,8 @@ config :ash_storage_demo, :s3,
   region: System.get_env("S3_REGION", "us-east-1"),
   access_key_id: System.get_env("S3_KEY", "minioadmin"),
   secret_access_key: System.get_env("S3_SECRET", "minioadmin"),
-  endpoint_url: System.get_env("S3_ENDPOINT", "http://localhost:19000")
+  endpoint_url: System.get_env("S3_ENDPOINT", "http://localhost:19000"),
+  presigned: true
 
 if config_env() == :prod do
   # Per-host Application env overrides for the AshStorage resources. ash_storage's
@@ -46,7 +47,8 @@ if config_env() == :prod do
     region: System.get_env("S3_REGION", "us-east-1"),
     access_key_id: System.fetch_env!("S3_KEY"),
     secret_access_key: System.fetch_env!("S3_SECRET"),
-    endpoint_url: System.fetch_env!("S3_ENDPOINT")
+    endpoint_url: System.fetch_env!("S3_ENDPOINT"),
+    presigned: true
   ]
 
   prod_s3_storage = [storage: [service: {AshStorage.Service.S3, prod_s3_opts}]]

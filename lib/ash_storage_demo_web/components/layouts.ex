@@ -73,7 +73,14 @@ defmodule AshStorageDemoWeb.Layouts do
         <span class="nav-sep" :if={@current_user} />
         <.theme_switch />
         <span :if={@current_user} class="user-chip" data-role="current-user">
-          <span class="user-avatar">{user_initial(@current_user)}</span>
+          <span class="user-avatar">
+            <img
+              :if={user_avatar_url(@current_user)}
+              src={user_avatar_url(@current_user)}
+              alt=""
+            />
+            <span :if={!user_avatar_url(@current_user)}>{user_initial(@current_user)}</span>
+          </span>
           <span class="user-email">{to_string(@current_user.email)}</span>
         </span>
         <.link
@@ -248,4 +255,8 @@ defmodule AshStorageDemoWeb.Layouts do
   end
 
   defp user_initial(_), do: "?"
+
+  defp user_avatar_url(%{avatar_small_url: url}) when is_binary(url) and url != "", do: url
+  defp user_avatar_url(%{avatar_url: url}) when is_binary(url) and url != "", do: url
+  defp user_avatar_url(_), do: nil
 end

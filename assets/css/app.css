@@ -370,6 +370,10 @@ em.serif, .serif em, .serif-em { font-style: italic; font-family: var(--font-ser
   background: var(--accent); color: var(--paper);
   font-size: 11px; font-weight: 600;
   display: grid; place-items: center;
+  overflow: hidden;
+}
+.user-avatar img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
 }
 .user-email { font-size: 12px; color: var(--ink-2); font-family: var(--font-mono); }
 
@@ -383,6 +387,34 @@ em.serif, .serif em, .serif-em { font-style: italic; font-family: var(--font-ser
   margin-bottom: 18px;
 }
 .back-link:hover { color: var(--ink); }
+
+.feed-cover {
+  position: relative;
+  width: 100%;
+  height: 220px;
+  margin-bottom: 56px;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--line-2);
+  background-color: var(--paper-2);
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+.feed-cover-avatar {
+  position: absolute;
+  left: 20px; bottom: -36px;
+  width: 84px; height: 84px;
+  border-radius: 999px;
+  border: 3px solid var(--paper);
+  background: var(--paper);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+  overflow: hidden;
+  display: block;
+}
+.feed-cover-avatar img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
+}
+
 .page-head { margin-bottom: 28px; }
 .page-head h1 {
   font-size: 32px; font-weight: 600; letter-spacing: -0.025em;
@@ -608,6 +640,10 @@ kbd, .kbd {
   width: 30px; height: 30px; border-radius: 8px;
   background: var(--ink); color: var(--paper);
   display: grid; place-items: center; font-size: 13px; font-weight: 600;
+  overflow: hidden;
+}
+.post-avatar img {
+  width: 100%; height: 100%; object-fit: cover; display: block;
 }
 .post-author > span > span { display: block; }
 .post-name { font-size: 13.5px; font-weight: 500; color: var(--ink); font-family: var(--font-mono); }
@@ -615,7 +651,25 @@ kbd, .kbd {
 .post-id { font-size: 11px; color: var(--ink-3); font-family: var(--font-mono); }
 .post-id-link { text-decoration: none; }
 .post-id-link:hover { color: var(--accent-ink); }
-.post-actions { display: inline-flex; align-items: center; gap: 8px; }
+.post-actions { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; justify-content: flex-end; }
+.post-hidden { opacity: 0.7; }
+.post-hidden .post-body { color: var(--ink-2); }
+.post-hidden-pill {
+  font-family: var(--font-mono); font-size: 10.5px;
+  padding: 2px 7px; border-radius: 4px;
+  background: var(--paper-2); color: var(--ink-2);
+  border: 1px dashed var(--line);
+  text-transform: uppercase; letter-spacing: 0.04em;
+}
+.post-hide-toggle {
+  display: inline-flex; align-items: center; gap: 5px;
+  font-size: 11px; color: var(--ink-3); cursor: pointer;
+  font-family: var(--font-mono);
+}
+.post-hide-toggle input { accent-color: var(--ink); cursor: pointer; }
+.post-hide-toggle:hover { color: var(--ink); }
+.btn-tiny-danger { color: var(--err); }
+.btn-tiny-danger:hover { border-color: var(--err); color: var(--err); }
 .page-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; align-items: center; }
 
 .post-body { font-size: 15px; line-height: 1.55; color: var(--ink); margin: 0 0 16px; max-width: 56ch; white-space: pre-wrap; }

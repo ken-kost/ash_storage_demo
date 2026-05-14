@@ -11,22 +11,32 @@ defmodule AshStorageDemoWeb.PostComponents do
   import AshStorageDemoWeb.StorageComponents
 
   attr :post, :any, required: true
-  attr :owner?, :boolean, default: false, doc: "Owner sees Unlink / Clear-all"
+  attr :owner?, :boolean, default: false, doc: "Owner sees Delete + Hidden toggle"
   attr :share_url, :string, default: nil, doc: "Absolute URL for the post"
   attr :linkable_header, :boolean, default: true, doc: "Link post id to /p/:id"
 
   def post_card(assigns) do
     ~H"""
-    <article class="post" data-role="post" id={"post-" <> @post.id}>
+    <article class={["post", @post.hidden && "post-hidden"]} data-role="post" id={"post-" <> @post.id}>
       <header class="post-head">
         <span class="post-author">
-          <span class="post-avatar">{author_initial(@post.author)}</span>
+          <span class="post-avatar">
+            <img
+              :if={author_avatar_url(@post.author)}
+              src={author_avatar_url(@post.author)}
+              alt=""
+            />
+            <span :if={!author_avatar_url(@post.author)}>{author_initial(@post.author)}</span>
+          </span>
           <span>
             <span class="post-name">{@post.author && to_string(@post.author.email)}</span>
             <span class="post-time">{format_time(@post.inserted_at)}</span>
           </span>
         </span>
         <span class="post-actions">
+          <span :if={@post.hidden} class="post-hidden-pill" data-role="post-hidden-pill">
+            Hidden
+          </span>
           <.link
             :if={@linkable_header}
             navigate={~p"/p/#{@post.id}"}
@@ -52,6 +62,31 @@ defmodule AshStorageDemoWeb.PostComponents do
           >
             Copy link
           </button>
+          <label
+            :if={@owner?}
+            class="post-hide-toggle"
+            data-role="post-hide-toggle"
+            title="Hide this post from public views"
+          >
+            <input
+              type="checkbox"
+              checked={@post.hidden}
+              phx-click="toggle-hidden"
+              phx-value-post-id={@post.id}
+            />
+            <span>Hidden</span>
+          </label>
+          <button
+            :if={@owner?}
+            type="button"
+            class="btn-tiny btn-tiny-danger"
+            phx-click="delete-post"
+            phx-value-post-id={@post.id}
+            data-role="post-delete"
+            data-confirm="Delete this post and all attached files? This cannot be undone."
+          >
+            Delete
+          </button>
         </span>
       </header>
 
@@ -67,16 +102,6 @@ defmodule AshStorageDemoWeb.PostComponents do
       <div :if={@post.photos != []} class="post-section">
         <div class="post-section-head">
           <span>Photos <em>({length(@post.photos)})</em></span>
-          <button
-            :if={@owner?}
-            type="button"
-            class="link-quiet danger"
-            phx-click="purge-photos"
-            phx-value-post-id={@post.id}
-            data-confirm="Delete all photos?"
-          >
-            Clear all
-          </button>
         </div>
         <div class="photo-grid">
           <img :for={photo <- @post.photos} src={photo.url} alt="photo" />
@@ -189,6 +214,9 @@ defmodule AshStorageDemoWeb.PostComponents do
   end
 
   defp author_initial(_), do: "?"
+
+  defp author_avatar_url(%{avatar_small_url: url}) when is_binary(url) and url != "", do: url
+  defp author_avatar_url(_), do: nil
 
   defp format_time(%{__struct__: _} = dt), do: Calendar.strftime(dt, "%Y-%m-%d %H:%M")
   defp format_time(_), do: ""

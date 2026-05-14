@@ -93,7 +93,11 @@ config :ash_storage_demo, :s3,
   region: System.get_env("S3_REGION", "us-east-1"),
   access_key_id: System.get_env("S3_KEY", "minioadmin"),
   secret_access_key: System.get_env("S3_SECRET", "minioadmin"),
-  endpoint_url: System.get_env("S3_ENDPOINT", "http://localhost:19000")
+  endpoint_url: System.get_env("S3_ENDPOINT", "http://localhost:19000"),
+  # Render `service.url/2` as SigV4-signed presigned URLs so private buckets
+  # work without bucket policy hacks. ReqS3 defaults presigned URL lifetime to
+  # one hour, which is fine for per-render avatar links.
+  presigned: true
 
 # Configure the endpoint
 config :ash_storage_demo, AshStorageDemoWeb.Endpoint,

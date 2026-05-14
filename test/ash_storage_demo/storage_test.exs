@@ -49,18 +49,19 @@ defmodule AshStorageDemo.StorageTest do
   end
 
   describe "Post.documents (per-attachment Disk → Service.Test, dependent: :detach)" do
-    test "attach + purge by blob_id", %{post: post} do
+    test "attach + purge by blob_id", %{post: post, user: user} do
       {:ok, %{blob: blob}} =
         Operations.attach(post, :documents, "hello",
           filename: "notes.txt",
-          content_type: "text/plain"
+          content_type: "text/plain",
+          actor: user
         )
 
-      post = Ash.load!(post, documents: :blob)
+      post = Ash.load!(post, [documents: :blob], actor: user)
       assert Enum.any?(post.documents, &(&1.blob.id == blob.id))
 
-      {:ok, _} = Operations.purge(post, :documents, blob_id: blob.id)
-      post = Ash.load!(post, [:documents], reuse_values?: false)
+      {:ok, _} = Operations.purge(post, :documents, blob_id: blob.id, actor: user)
+      post = Ash.load!(post, [:documents], reuse_values?: false, actor: user)
       assert post.documents == []
     end
   end

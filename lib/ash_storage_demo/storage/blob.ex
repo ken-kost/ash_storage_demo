@@ -7,6 +7,10 @@ defmodule AshStorageDemo.Storage.Blob do
   postgres do
     table "storage_blobs"
     repo AshStorageDemo.Repo
+
+    references do
+      reference :source_blob, on_delete: :delete
+    end
   end
 
   blob do

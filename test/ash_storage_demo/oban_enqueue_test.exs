@@ -21,12 +21,14 @@ defmodule AshStorageDemo.ObanEnqueueTest do
   end
 
   test "attaching a Post.photo flags the blob as pending_analyzers without running inline", %{
-    post: post
+    post: post,
+    user: user
   } do
     {:ok, %{blob: blob}} =
       Operations.attach(post, :photos, png_bytes(),
         filename: "p.png",
-        content_type: "image/png"
+        content_type: "image/png",
+        actor: user
       )
 
     blob = Ash.reload!(blob)

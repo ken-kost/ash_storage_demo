@@ -40,7 +40,8 @@ defmodule AshStorageDemoWeb.FeedLiveTest do
     {:ok, _} =
       Operations.attach(p, :documents, "hi",
         filename: "notes.txt",
-        content_type: "text/plain"
+        content_type: "text/plain",
+        actor: user
       )
 
     {:ok, view, html} = live(conn, ~p"/feed")

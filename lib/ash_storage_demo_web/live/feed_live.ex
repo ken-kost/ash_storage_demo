@@ -13,7 +13,7 @@ defmodule AshStorageDemoWeb.FeedLive do
     photos: [:url, :blob],
     videos: [:url, :blob],
     documents: [:url, :blob],
-    author: [:email]
+    author: [:email, :avatar_small_url]
   ]
 
   @impl true
@@ -67,9 +67,11 @@ defmodule AshStorageDemoWeb.FeedLive do
   end
 
   def handle_event("detach-document", %{"post-id" => post_id, "blob-id" => blob_id}, socket) do
-    case fetch_post(post_id) do
+    actor = socket.assigns.current_user
+
+    case fetch_post(post_id, actor) do
       {:ok, post} ->
-        case Operations.detach(post, :documents, blob_id: blob_id) do
+        case Operations.detach(post, :documents, blob_id: blob_id, actor: actor) do
           {:ok, _} ->
             {:noreply, socket |> put_flash(:info, "Document unlinked") |> reload_posts()}
 
@@ -82,13 +84,33 @@ defmodule AshStorageDemoWeb.FeedLive do
     end
   end
 
-  def handle_event("purge-photos", %{"post-id" => post_id}, socket) do
-    case fetch_post(post_id) do
-      {:ok, post} ->
-        case Operations.purge(post, :photos, all: true) do
-          {:ok, _} -> {:noreply, socket |> put_flash(:info, "Photos cleared") |> reload_posts()}
-          {:error, e} -> {:noreply, put_flash(socket, :error, format_error(e))}
-        end
+  def handle_event("delete-post", %{"post-id" => post_id}, socket) do
+    actor = socket.assigns.current_user
+
+    with {:ok, post} <- fetch_post(post_id, actor),
+         :ok <- Ash.destroy(post, actor: actor) do
+      {:noreply, socket |> put_flash(:info, "Post deleted") |> reload_posts()}
+    else
+      {:error, e} ->
+        {:noreply, put_flash(socket, :error, format_error(e))}
+
+      :error ->
+        {:noreply, put_flash(socket, :error, "Post not found")}
+    end
+  end
+
+  def handle_event("toggle-hidden", %{"post-id" => post_id}, socket) do
+    actor = socket.assigns.current_user
+
+    with {:ok, post} <- fetch_post(post_id, actor),
+         new_hidden = !post.hidden,
+         {:ok, _post} <-
+           Ash.update(post, %{hidden: new_hidden}, action: :set_hidden, actor: actor) do
+      flash = if new_hidden, do: "Post hidden from public views", else: "Post is now public"
+      {:noreply, socket |> put_flash(:info, flash) |> reload_posts()}
+    else
+      {:error, e} ->
+        {:noreply, put_flash(socket, :error, format_error(e))}
 
       :error ->
         {:noreply, put_flash(socket, :error, "Post not found")}
@@ -136,20 +158,22 @@ defmodule AshStorageDemoWeb.FeedLive do
     end
   end
 
-  defp fetch_post(id) do
-    case Ash.get(Post, id) do
-      {:ok, post} -> {:ok, Ash.load!(post, @load_spec)}
+  defp fetch_post(id, actor) do
+    case Ash.get(Post, id, actor: actor) do
+      {:ok, post} -> {:ok, Ash.load!(post, @load_spec, actor: actor)}
       _ -> :error
     end
   end
 
   defp reload_posts(socket) do
+    actor = socket.assigns.current_user
+
     posts =
       Post
       |> Ash.Query.sort(inserted_at: :desc)
-      |> Ash.read!(page: [limit: 20, count: false], authorize?: false)
+      |> Ash.read!(page: [limit: 20, count: false], actor: actor)
       |> page_results()
-      |> Ash.load!(@load_spec, authorize?: false)
+      |> Ash.load!(@load_spec, actor: actor)
 
     assign(socket, posts: posts)
   end
@@ -251,7 +275,7 @@ defmodule AshStorageDemoWeb.FeedLive do
       <.post_card
         :for={post <- @posts}
         post={post}
-        owner?={true}
+        owner?={post.author_id == @current_user.id}
         share_url={absolute_url(~p"/p/#{post.id}")}
       />
     </Layouts.app>

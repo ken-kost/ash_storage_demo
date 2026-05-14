@@ -25,13 +25,14 @@ defmodule AshStorageDemoWeb.StorageAdminLiveTest do
     {:ok, %{blob: blob}} =
       Operations.attach(p, :documents, "hi",
         filename: "k.txt",
-        content_type: "text/plain"
+        content_type: "text/plain",
+        actor: user
       )
 
     {:ok, _view, html} = live(conn, ~p"/storage-admin")
     assert html =~ "k.txt"
 
-    {:ok, _} = Operations.detach(p, :documents, blob_id: blob.id)
+    {:ok, _} = Operations.detach(p, :documents, blob_id: blob.id, actor: user)
 
     # Re-render after detach by re-running the mount; the LiveView itself
     # has no auto-refresh, but the purge button is the user-facing action.
