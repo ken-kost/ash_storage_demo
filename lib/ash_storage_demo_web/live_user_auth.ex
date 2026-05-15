@@ -15,7 +15,7 @@ defmodule AshStorageDemoWeb.LiveUserAuth do
 
   def on_mount(:live_user_optional, _params, _session, socket) do
     if socket.assigns[:current_user] do
-      {:cont, socket}
+      {:cont, assign(socket, :current_user, load_nav_decorations(socket.assigns.current_user))}
     else
       {:cont, assign(socket, :current_user, nil)}
     end
@@ -23,7 +23,7 @@ defmodule AshStorageDemoWeb.LiveUserAuth do
 
   def on_mount(:live_user_required, _params, _session, socket) do
     if socket.assigns[:current_user] do
-      {:cont, socket}
+      {:cont, assign(socket, :current_user, load_nav_decorations(socket.assigns.current_user))}
     else
       {:halt, Phoenix.LiveView.redirect(socket, to: ~p"/sign-in")}
     end
@@ -35,5 +35,9 @@ defmodule AshStorageDemoWeb.LiveUserAuth do
     else
       {:cont, assign(socket, :current_user, nil)}
     end
+  end
+
+  defp load_nav_decorations(user) do
+    Ash.load!(user, [:avatar_small_url], authorize?: false)
   end
 end

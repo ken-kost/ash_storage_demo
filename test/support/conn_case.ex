@@ -27,12 +27,30 @@ defmodule AshStorageDemoWeb.ConnCase do
       # Import conveniences for testing with connections
       import Plug.Conn
       import Phoenix.ConnTest
+      import Phoenix.LiveViewTest
       import AshStorageDemoWeb.ConnCase
+      import AshStorageDemo.Fixtures
     end
   end
 
   setup tags do
     AshStorageDemo.DataCase.setup_sandbox(tags)
+    AshStorage.Service.Test.reset!()
     {:ok, conn: Phoenix.ConnTest.build_conn()}
+  end
+
+  @doc """
+  Builds a conn the auth plugs will treat as a signed-in user. Mints a
+  JWT directly via `AshAuthentication.Jwt.token_for_user/2` (the User
+  resource has `require_token_presence_for_authentication? true`, so a
+  real token has to land in the token table), then puts it in session.
+  """
+  def log_in_user(conn, user) do
+    {:ok, token, _claims} = AshAuthentication.Jwt.token_for_user(user)
+    user_with_token = Ash.Resource.put_metadata(user, :token, token)
+
+    conn
+    |> Phoenix.ConnTest.init_test_session(%{})
+    |> AshAuthentication.Plug.Helpers.store_in_session(user_with_token)
   end
 end
