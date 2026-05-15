@@ -15,7 +15,10 @@ defmodule AshStorageDemo.Storage.StickerAttachment do
     repo AshStorageDemo.Repo
 
     references do
-      reference :reaction, on_delete: :delete
+      # `:nilify` rather than `:delete` so AshStorage's after_action cleanup
+      # hook can still locate the sticker attachment row when its parent is
+      # destroyed. See storage/attachment.ex for the longer explanation.
+      reference :reaction, on_delete: :nilify
     end
   end
 
