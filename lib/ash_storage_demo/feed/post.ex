@@ -3,6 +3,7 @@ defmodule AshStorageDemo.Feed.Post do
     otp_app: :ash_storage_demo,
     domain: AshStorageDemo.Feed,
     data_layer: AshPostgres.DataLayer,
+    authorizers: [Ash.Policy.Authorizer],
     extensions: [AshStorage]
 
   postgres do
@@ -21,8 +22,24 @@ defmodule AshStorageDemo.Feed.Post do
     service({AshStorage.Service.S3, Application.compile_env(:ash_storage_demo, :s3)})
 
     has_one_attached :cover_image do
+      # Mirror S3 (primary) → Disk (secondary). Reads consult S3 first and fall
+      # through to Disk on :not_found; writes fan out to both. Demonstrates
+      # the upstream `AshStorage.Service.Mirror` roadmap item.
+      service(
+        {AshStorage.Service.S3,
+         Application.compile_env(:ash_storage_demo, :s3) ++
+           [
+             mirrors: [
+               {AshStorage.Service.Disk,
+                root: "priv/storage/cover_images_mirror", base_url: "/files/cover_images_mirror"}
+             ]
+           ]}
+      )
+
       analyzer(AshStorageDemo.Analyzers.FileInfo)
       analyzer(AshStorageDemo.Analyzers.ImageDimensions)
+
+      variant(:feed_size, {AshStorageDemo.Variants.Image, width: 1200}, generate: :oban)
     end
 
     has_many_attached :photos do
@@ -37,10 +54,15 @@ defmodule AshStorageDemo.Feed.Post do
           gps_lng: :gps_lng
         ]
       )
+
+      # generate: :on_demand is the default — first URL load triggers it.
+      variant(:thumb, {AshStorageDemo.Variants.Image, width: 300})
     end
 
     has_many_attached :videos do
       analyzer(AshStorageDemo.Analyzers.FileInfo)
+
+      variant(:poster, {AshStorageDemo.Variants.VideoPoster, at: 1.0})
     end
 
     has_many_attached :documents do
@@ -51,6 +73,8 @@ defmodule AshStorageDemo.Feed.Post do
       dependent(:detach)
 
       analyzer(AshStorageDemo.Analyzers.FileInfo)
+
+      variant(:preview, {AshStorageDemo.Variants.PdfPreview, width: 400})
     end
   end
 
@@ -67,6 +91,25 @@ defmodule AshStorageDemo.Feed.Post do
       primary? true
       accept [:body]
     end
+
+    update :set_hidden do
+      accept [:hidden]
+    end
+  end
+
+  policies do
+    policy action_type(:read) do
+      authorize_if expr(not hidden)
+      authorize_if expr(author_id == ^actor(:id))
+    end
+
+    policy action_type(:create) do
+      authorize_if actor_present()
+    end
+
+    policy action_type([:update, :destroy]) do
+      authorize_if expr(author_id == ^actor(:id))
+    end
   end
 
   attributes do
@@ -76,6 +119,12 @@ defmodule AshStorageDemo.Feed.Post do
       public? true
       allow_nil? false
       constraints max_length: 1_000
+    end
+
+    attribute :hidden, :boolean do
+      public? true
+      allow_nil? false
+      default false
     end
 
     # Populated by the Exif analyzer's `write_attributes` when a photo is

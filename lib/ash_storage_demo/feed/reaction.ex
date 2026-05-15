@@ -21,7 +21,9 @@ defmodule AshStorageDemo.Feed.Reaction do
 
     service({AshStorage.Service.S3, Application.compile_env(:ash_storage_demo, :s3)})
 
-    has_one_attached(:sticker)
+    has_one_attached :sticker do
+      variant(:outlined, {AshStorageDemo.Variants.OutlinedSticker, radius: 4})
+    end
   end
 
   actions do

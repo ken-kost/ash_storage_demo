@@ -20,7 +20,12 @@ config :ash_storage_demo, Oban,
     blob_run_pending_variants: 5
   ],
   repo: AshStorageDemo.Repo,
-  plugins: [{Oban.Plugins.Cron, []}]
+  plugins: [
+    {Oban.Plugins.Cron,
+     crontab: [
+       {"*/5 * * * *", AshStorageDemo.Storage.VolumeUsage.Worker}
+     ]}
+  ]
 
 config :ash,
   allow_forbidden_field_for_relationships_by_default?: true,
@@ -74,20 +79,32 @@ config :ash_storage_demo,
     AshStorageDemo.Accounts,
     AshStorageDemo.Storage,
     AshStorageDemo.Feed,
-    AshStorageDemo.Messaging
-  ],
-  ash_authentication: [return_error_on_invalid_magic_link_token?: true]
+    AshStorageDemo.Messaging,
+    AshStorageDemo.Tagging
+  ]
 
 # Defaults for the AshStorage S3 service. Compile-time so the resource DSL can
-# capture it via Application.compile_env/2. config/runtime.exs re-applies the
-# same shape so env-driven prod overrides land in Application.get_env, which
-# AshStorage's per-resource info lookup also consults at runtime.
+# capture it via Application.compile_env/2. Values are read from env vars so a
+# release build picks up prod S3 settings via Docker build args; runtime.exs
+# re-applies the same shape so the values are present in Application.get_env
+# at runtime too (avoids Elixir's compile-vs-runtime mismatch abort).
 config :ash_storage_demo, :s3,
-  bucket: "ash-storage-demo",
-  region: "us-east-1",
-  access_key_id: "minioadmin",
-  secret_access_key: "minioadmin",
-  endpoint_url: "http://localhost:19000"
+  bucket: System.get_env("S3_BUCKET", "ash-storage-demo"),
+  region: System.get_env("S3_REGION", "us-east-1"),
+  access_key_id: System.get_env("S3_KEY", "minioadmin"),
+  secret_access_key: System.get_env("S3_SECRET", "minioadmin"),
+  endpoint_url: System.get_env("S3_ENDPOINT", "http://localhost:19000"),
+  # Render `service.url/2` as SigV4-signed presigned URLs so private buckets
+  # work without bucket policy hacks. ReqS3 defaults presigned URL lifetime to
+  # one hour, which is fine for per-render avatar links.
+  presigned: true
+
+# Disk roots used by `AshStorageDemoWeb.DiskServeRuntime`. The runtime.exs prod
+# block overrides these to point at the mounted Fly volume via
+# `DISK_STORAGE_ROOT`; here we default to the dev/test paths under priv/.
+config :ash_storage_demo, :disk_storage,
+  documents: "priv/storage/documents",
+  cover_images_mirror: "priv/storage/cover_images_mirror"
 
 # Configure the endpoint
 config :ash_storage_demo, AshStorageDemoWeb.Endpoint,

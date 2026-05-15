@@ -24,11 +24,13 @@ defmodule AshStorageDemo.DataCase do
       import Ecto.Changeset
       import Ecto.Query
       import AshStorageDemo.DataCase
+      import AshStorageDemo.Fixtures
     end
   end
 
   setup tags do
     AshStorageDemo.DataCase.setup_sandbox(tags)
+    AshStorage.Service.Test.reset!()
     :ok
   end
 

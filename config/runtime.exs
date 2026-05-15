@@ -31,9 +31,70 @@ config :ash_storage_demo, :s3,
   region: System.get_env("S3_REGION", "us-east-1"),
   access_key_id: System.get_env("S3_KEY", "minioadmin"),
   secret_access_key: System.get_env("S3_SECRET", "minioadmin"),
-  endpoint_url: System.get_env("S3_ENDPOINT", "http://localhost:19000")
+  endpoint_url: System.get_env("S3_ENDPOINT", "http://localhost:19000"),
+  presigned: true
 
 if config_env() == :prod do
+  # Per-host Application env overrides for the AshStorage resources. ash_storage's
+  # Info.attachment_service/2 (see deps/ash_storage/lib/ash_storage/info.ex) checks
+  # `Application.fetch_env(otp_app, resource)` before consulting the DSL-baked
+  # `service({...})` tuple, so this is the supported way to swap S3 creds at
+  # runtime without rebuilding the release. The resource DSLs still capture
+  # `Application.compile_env(:ash_storage_demo, :s3)` at build time (with the dev
+  # defaults from config.exs); these overrides win for every host listed below.
+  prod_s3_opts = [
+    bucket: System.fetch_env!("S3_BUCKET"),
+    region: System.get_env("S3_REGION", "us-east-1"),
+    access_key_id: System.fetch_env!("S3_KEY"),
+    secret_access_key: System.fetch_env!("S3_SECRET"),
+    endpoint_url: System.fetch_env!("S3_ENDPOINT"),
+    presigned: true
+  ]
+
+  prod_s3_storage = [storage: [service: {AshStorage.Service.S3, prod_s3_opts}]]
+
+  config :ash_storage_demo, AshStorageDemo.Accounts.User, prod_s3_storage
+  config :ash_storage_demo, AshStorageDemo.Feed.Reaction, prod_s3_storage
+  config :ash_storage_demo, AshStorageDemo.Feed.Story, prod_s3_storage
+  config :ash_storage_demo, AshStorageDemo.Messaging.Message, prod_s3_storage
+  config :ash_storage_demo, AshStorageDemo.Tagging.Tag, prod_s3_storage
+
+  # Post needs per-attachment overrides for the two Disk-using attachments:
+  # `cover_image` (S3 primary + Disk mirror) and `documents` (Disk only). Both
+  # write under DISK_STORAGE_ROOT so a Fly volume mounted at e.g. /data/storage
+  # keeps the bytes across redeploys instead of landing on the container's
+  # ephemeral filesystem. `photos` / `videos` inherit the resource-level S3
+  # override above.
+  disk_root = System.get_env("DISK_STORAGE_ROOT", "priv/storage")
+
+  cover_images_mirror_disk =
+    {AshStorage.Service.Disk,
+     root: Path.join(disk_root, "cover_images_mirror"), base_url: "/files/cover_images_mirror"}
+
+  documents_disk =
+    {AshStorage.Service.Disk,
+     root: Path.join(disk_root, "documents"), base_url: "/files/documents"}
+
+  config :ash_storage_demo, AshStorageDemo.Feed.Post,
+    storage: [
+      service: {AshStorage.Service.S3, prod_s3_opts},
+      has_one_attached: [
+        cover_image: [
+          service: {AshStorage.Service.S3, prod_s3_opts ++ [mirrors: [cover_images_mirror_disk]]}
+        ]
+      ],
+      has_many_attached: [
+        documents: [service: documents_disk]
+      ]
+    ]
+
+  # Mirror the same disk roots into `:disk_storage` so the router's
+  # `DiskServeRuntime` plug serves bytes from the Fly volume, not the
+  # compiled-in dev defaults.
+  config :ash_storage_demo, :disk_storage,
+    documents: Path.join(disk_root, "documents"),
+    cover_images_mirror: Path.join(disk_root, "cover_images_mirror")
+
   database_url =
     System.get_env("DATABASE_URL") ||
       raise """
