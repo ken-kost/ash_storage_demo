@@ -21,11 +21,11 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "name",
+      "source": "body",
       "type": "text"
     },
     {
-      "allow_nil?": false,
+      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -33,11 +33,11 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "record_type",
+      "source": "taken_at",
       "type": "text"
     },
     {
-      "allow_nil?": false,
+      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -45,11 +45,59 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "record_id",
+      "source": "camera",
       "type": "text"
     },
     {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "gps_lat",
+      "type": "float"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "gps_lng",
+      "type": "float"
+    },
+    {
       "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "inserted_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "updated_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -67,16 +115,16 @@
           "global": null,
           "strategy": null
         },
-        "name": "storage_attachments_blob_id_fkey",
-        "on_delete": null,
+        "name": "posts_author_id_fkey",
+        "on_delete": "nilify",
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "storage_blobs"
+        "table": "users"
       },
       "scale": null,
       "size": null,
-      "source": "blob_id",
+      "source": "author_id",
       "type": "uuid"
     }
   ],
@@ -86,7 +134,7 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "AB25990F98919B08314F64149035588303074003CA80B9BED029116DCA0CFB53",
+  "hash": "3337372C06D51F203AF0720EFBC33AC2C4F9C3147AD5EE2DD08B8C04774DCBEF",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -95,5 +143,5 @@
   },
   "repo": "Elixir.AshStorageDemo.Repo",
   "schema": null,
-  "table": "storage_attachments"
+  "table": "posts"
 }

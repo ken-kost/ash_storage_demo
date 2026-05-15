@@ -12,7 +12,8 @@ defmodule AshStorageDemo.Storage.OrphansTest do
     {:ok, %{blob: linked}} =
       Operations.attach(post, :documents, "x",
         filename: "x.txt",
-        content_type: "text/plain"
+        content_type: "text/plain",
+        actor: user
       )
 
     # 2. Manufactured orphan — detach the attachment row directly, leaving
@@ -21,10 +22,11 @@ defmodule AshStorageDemo.Storage.OrphansTest do
     {:ok, %{blob: orphan}} =
       Operations.attach(post, :documents, "y",
         filename: "y.txt",
-        content_type: "text/plain"
+        content_type: "text/plain",
+        actor: user
       )
 
-    {:ok, _} = Operations.detach(post, :documents, blob_id: orphan.id)
+    {:ok, _} = Operations.detach(post, :documents, blob_id: orphan.id, actor: user)
 
     ids = Enum.map(Orphans.orphan_blobs(), & &1.id)
     refute linked.id in ids
@@ -38,10 +40,11 @@ defmodule AshStorageDemo.Storage.OrphansTest do
     {:ok, %{blob: orphan}} =
       Operations.attach(post, :documents, "z",
         filename: "z.txt",
-        content_type: "text/plain"
+        content_type: "text/plain",
+        actor: user
       )
 
-    {:ok, _} = Operations.detach(post, :documents, blob_id: orphan.id)
+    {:ok, _} = Operations.detach(post, :documents, blob_id: orphan.id, actor: user)
 
     assert Orphans.purge_orphan_records() == 1
     assert {:error, _} = Ash.get(Blob, orphan.id, authorize?: false)

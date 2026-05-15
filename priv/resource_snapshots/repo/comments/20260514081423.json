@@ -21,8 +21,32 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "name",
+      "source": "body",
       "type": "text"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "inserted_at",
+      "type": "utc_datetime_usec"
+    },
+    {
+      "allow_nil?": false,
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": null,
+      "scale": null,
+      "size": null,
+      "source": "updated_at",
+      "type": "utc_datetime_usec"
     },
     {
       "allow_nil?": false,
@@ -43,16 +67,16 @@
           "global": null,
           "strategy": null
         },
-        "name": "storage_sticker_attachments_blob_id_fkey",
-        "on_delete": null,
+        "name": "comments_post_id_fkey",
+        "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "storage_blobs"
+        "table": "posts"
       },
       "scale": null,
       "size": null,
-      "source": "blob_id",
+      "source": "post_id",
       "type": "uuid"
     },
     {
@@ -74,16 +98,16 @@
           "global": null,
           "strategy": null
         },
-        "name": "storage_sticker_attachments_reaction_id_fkey",
-        "on_delete": "delete",
+        "name": "comments_author_id_fkey",
+        "on_delete": "nilify",
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "reactions"
+        "table": "users"
       },
       "scale": null,
       "size": null,
-      "source": "reaction_id",
+      "source": "author_id",
       "type": "uuid"
     }
   ],
@@ -93,7 +117,7 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "09133D6F01AEA63A4C80283E9E7804999A5DE1D4D1CF0A7471B157E1FADAAF9C",
+  "hash": "9782CB5E50AAB65BDEE59C65F8C9BF9D1BDE2383E2A80A5D149200AB885DA545",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -102,5 +126,5 @@
   },
   "repo": "Elixir.AshStorageDemo.Repo",
   "schema": null,
-  "table": "storage_sticker_attachments"
+  "table": "comments"
 }

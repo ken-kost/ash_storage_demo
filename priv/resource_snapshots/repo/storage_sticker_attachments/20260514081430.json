@@ -30,26 +30,33 @@
       "generated?": false,
       "precision": null,
       "primary_key?": false,
-      "references": null,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "name": "storage_sticker_attachments_blob_id_fkey",
+        "on_delete": null,
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "storage_blobs"
+      },
       "scale": null,
       "size": null,
-      "source": "record_type",
-      "type": "text"
+      "source": "blob_id",
+      "type": "uuid"
     },
     {
-      "allow_nil?": false,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "record_id",
-      "type": "text"
-    },
-    {
-      "allow_nil?": false,
+      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -67,16 +74,16 @@
           "global": null,
           "strategy": null
         },
-        "name": "storage_poly_attachments_blob_id_fkey",
-        "on_delete": null,
+        "name": "storage_sticker_attachments_reaction_id_fkey",
+        "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "storage_blobs"
+        "table": "reactions"
       },
       "scale": null,
       "size": null,
-      "source": "blob_id",
+      "source": "reaction_id",
       "type": "uuid"
     }
   ],
@@ -86,7 +93,7 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "CD799A599C2D1B70DEDE34D2DA1DD28F4475BC62197AA03B3D52FE1BCA955D61",
+  "hash": "87483083273864EAD9931AE4C96456600B3CE8668BD08CF2AFF42CDC501BC24D",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -95,5 +102,5 @@
   },
   "repo": "Elixir.AshStorageDemo.Repo",
   "schema": null,
-  "table": "storage_poly_attachments"
+  "table": "storage_sticker_attachments"
 }

@@ -2,10 +2,14 @@ defmodule AshStorageDemoWeb.HomeLiveTest do
   use AshStorageDemoWeb.ConnCase, async: false
 
   describe "guest view" do
-    test "renders heading + empty placeholder", %{conn: conn} do
-      {:ok, _view, html} = live(conn, ~p"/")
-      assert html =~ "AshStorageDemo"
-      assert html =~ "No posts yet"
+    test "renders the hero + module tile grid", %{conn: conn} do
+      {:ok, view, html} = live(conn, ~p"/")
+      assert html =~ "ash"
+      assert html =~ "storage"
+      assert html =~ "Storage that knows"
+      assert has_element?(view, "[data-role='tile-feed']")
+      assert has_element?(view, "[data-role='tile-profile']")
+      assert has_element?(view, "[data-role='tile-storage']")
     end
 
     test "shows Sign in + Register CTAs and no Feed link in nav", %{conn: conn} do

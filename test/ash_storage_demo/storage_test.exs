@@ -7,7 +7,6 @@ defmodule AshStorageDemo.StorageTest do
   use AshStorageDemo.DataCase, async: false
 
   alias AshStorage.Operations
-  alias AshStorageDemo.Accounts.User
   alias AshStorageDemo.Feed.{Comment, Post, Reaction, Story}
   alias AshStorageDemo.Messaging.Message
   alias AshStorageDemo.Tagging.Tag
@@ -15,10 +14,7 @@ defmodule AshStorageDemo.StorageTest do
   setup do
     AshStorage.Service.Test.reset!()
 
-    {:ok, user} =
-      Ash.Seed.seed!(%User{email: "alice@example.com"})
-      |> then(&{:ok, &1})
-
+    user = user(email: "alice@example.com")
     {:ok, post} = Ash.create(Post, %{body: "hello"}, actor: user, authorize?: false)
     {:ok, user: user, post: post}
   end
@@ -53,18 +49,19 @@ defmodule AshStorageDemo.StorageTest do
   end
 
   describe "Post.documents (per-attachment Disk → Service.Test, dependent: :detach)" do
-    test "attach + purge by blob_id", %{post: post} do
+    test "attach + purge by blob_id", %{post: post, user: user} do
       {:ok, %{blob: blob}} =
         Operations.attach(post, :documents, "hello",
           filename: "notes.txt",
-          content_type: "text/plain"
+          content_type: "text/plain",
+          actor: user
         )
 
-      post = Ash.load!(post, documents: :blob)
+      post = Ash.load!(post, [documents: :blob], actor: user)
       assert Enum.any?(post.documents, &(&1.blob.id == blob.id))
 
-      {:ok, _} = Operations.purge(post, :documents, blob_id: blob.id)
-      post = Ash.load!(post, [:documents], reuse_values?: false)
+      {:ok, _} = Operations.purge(post, :documents, blob_id: blob.id, actor: user)
+      post = Ash.load!(post, [:documents], reuse_values?: false, actor: user)
       assert post.documents == []
     end
   end

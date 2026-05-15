@@ -10,24 +10,25 @@ defmodule AshStorageDemo.ObanEnqueueTest do
   use Oban.Testing, repo: AshStorageDemo.Repo
 
   alias AshStorage.Operations
-  alias AshStorageDemo.Accounts.User
   alias AshStorageDemo.Feed.Post
 
   setup do
     AshStorage.Service.Test.reset!()
 
-    user = Ash.Seed.seed!(%User{email: "alice@example.com"})
+    user = user(email: "alice@example.com")
     {:ok, post} = Ash.create(Post, %{body: "hi"}, actor: user)
     {:ok, user: user, post: post}
   end
 
   test "attaching a Post.photo flags the blob as pending_analyzers without running inline", %{
-    post: post
+    post: post,
+    user: user
   } do
     {:ok, %{blob: blob}} =
       Operations.attach(post, :photos, png_bytes(),
         filename: "p.png",
-        content_type: "image/png"
+        content_type: "image/png",
+        actor: user
       )
 
     blob = Ash.reload!(blob)
