@@ -35,3 +35,6 @@ ash_storage_demo-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Runtime files written by AshStorage.Service.Disk (Post.documents,
+# Comment.attachments, the Mirror secondary on Post.cover_image, ...).
+/priv/storage/
