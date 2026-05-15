@@ -140,7 +140,14 @@ defmodule AshStorageDemoWeb.PostComponents do
             />
             <div class="doc-row">
               <a class="doc-link" href={vid.url} target="_blank">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                >
                   <rect x="3" y="6" width="13" height="12" rx="2" />
                   <path d="m16 10 5-3v10l-5-3z" />
                 </svg>
@@ -160,7 +167,14 @@ defmodule AshStorageDemoWeb.PostComponents do
           <li :for={doc <- @post.documents}>
             <div class="doc-row">
               <a class="doc-link" href={doc.url} target="_blank">
-                <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="14"
+                  height="14"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="1.7"
+                >
                   <path d="M14 3H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z" />
                   <path d="M14 3v6h6M8 13h8M8 17h6" />
                 </svg>

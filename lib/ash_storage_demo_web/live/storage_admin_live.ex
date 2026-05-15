@@ -141,8 +141,10 @@ defmodule AshStorageDemoWeb.StorageAdminLive do
       <div class="page-head">
         <h1>Storage admin</h1>
         <p class="page-sub">
-          Aggregate view across every host. For the per-resource UI see
-          <a class="inline-link mono" href="/admin/">/admin/</a>.
+          Aggregate view across every host. For the per-resource UI see <a
+            class="inline-link mono"
+            href="/admin/"
+          >/admin/</a>.
         </p>
       </div>
 
@@ -237,7 +239,15 @@ defmodule AshStorageDemoWeb.StorageAdminLive do
           <h2>Recent blobs</h2>
           <div class="theme-switch" role="group" aria-label="Filter">
             <button
-              :for={{key, label} <- [{"all", "All"}, {"images", "Images"}, {"video", "Video"}, {"docs", "Docs"}, {"variants", "Variants"}]}
+              :for={
+                {key, label} <- [
+                  {"all", "All"},
+                  {"images", "Images"},
+                  {"video", "Video"},
+                  {"docs", "Docs"},
+                  {"variants", "Variants"}
+                ]
+              }
               type="button"
               phx-click="filter"
               phx-value-kind={key}
@@ -279,8 +289,6 @@ defmodule AshStorageDemoWeb.StorageAdminLive do
   defp service_split([]), do: nil
 
   defp service_split(services) do
-    services
-    |> Enum.map(fn {svc, bytes} -> "#{svc} #{format_bytes(bytes)}" end)
-    |> Enum.join(" · ")
+    Enum.map_join(services, " · ", fn {svc, bytes} -> "#{svc} #{format_bytes(bytes)}" end)
   end
 end

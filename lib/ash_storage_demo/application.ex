@@ -11,7 +11,8 @@ defmodule AshStorageDemo.Application do
       [
         AshStorageDemoWeb.Telemetry,
         AshStorageDemo.Repo,
-        {DNSCluster, query: Application.get_env(:ash_storage_demo, :dns_cluster_query) || :ignore},
+        {DNSCluster,
+         query: Application.get_env(:ash_storage_demo, :dns_cluster_query) || :ignore},
         {Oban,
          AshOban.config(
            Application.fetch_env!(:ash_storage_demo, :ash_domains),

@@ -32,8 +32,7 @@ defmodule AshStorageDemoWeb.HomeLive do
 
         <h1 class="hero-title">
           Storage that knows<br />
-          <em>where</em> things live, <em>what</em> they are,<br />
-          and <em>who</em> they belong to.
+          <em>where</em> things live, <em>what</em> they are,<br /> and <em>who</em> they belong to.
         </h1>
 
         <p class="hero-lede">
@@ -45,9 +44,11 @@ defmodule AshStorageDemoWeb.HomeLive do
           <div class="feature-row">
             <dt>Multi-service routing</dt>
             <dd>
-              <code>has_one_attached</code>/<code>has_many_attached</code> on
-              <code>Post</code> route photos &amp; videos to <strong>S3</strong> and
-              documents to <strong>Disk</strong> — service is per-attachment, not per-app.
+              <code>has_one_attached</code>/<code>has_many_attached</code> on <code>Post</code>
+              route photos &amp; videos to <strong>S3</strong>
+              and
+              documents to <strong>Disk</strong>
+              — service is per-attachment, not per-app.
               <.link navigate={feed_path(@current_user)} class="feature-try">
                 Try in the feed →
               </.link>
@@ -56,10 +57,14 @@ defmodule AshStorageDemoWeb.HomeLive do
           <div class="feature-row">
             <dt>Analyzers</dt>
             <dd>
-              Post-upload pipeline runs <em>FileInfo</em> (MIME sniffing),
-              <em>ImageDimensions</em> (via :oban), <em>Exif</em>
-              (writes <code>taken_at</code> / <code>camera</code> / <code>gps_*</code>
-              back to the host), and <em>DominantColor</em> on avatars. Status pills
+              Post-upload pipeline runs <em>FileInfo</em>
+              (MIME sniffing), <em>ImageDimensions</em>
+              (via :oban), <em>Exif</em>
+              (writes <code>taken_at</code>
+              / <code>camera</code>
+              / <code>gps_*</code>
+              back to the host), and <em>DominantColor</em>
+              on avatars. Status pills
               show pending → complete / error / skipped.
               <.link navigate={profile_path(@current_user)} class="feature-try">
                 Try on profile →
@@ -69,8 +74,10 @@ defmodule AshStorageDemoWeb.HomeLive do
           <div class="feature-row">
             <dt>Variants</dt>
             <dd>
-              Derived blobs in three modes: <em>eager</em> (avatar small/medium/large),
-              <em>:oban</em> (cover_image feed_size), <em>on-demand</em> (photo
+              Derived blobs in three modes: <em>eager</em>
+              (avatar small/medium/large), <em>:oban</em>
+              (cover_image feed_size), <em>on-demand</em>
+              (photo
               thumbnails, PDF previews, video posters). Custom variants too —
               see <code>OutlinedSticker</code>.
               <.link navigate={profile_path(@current_user)} class="feature-try">
@@ -81,7 +88,8 @@ defmodule AshStorageDemoWeb.HomeLive do
           <div class="feature-row">
             <dt>Mirroring service</dt>
             <dd>
-              Cover images use <code>AshStorage.Service.Mirror</code> — writes fan out
+              Cover images use <code>AshStorage.Service.Mirror</code>
+              — writes fan out
               to S3 + a Disk mirror, reads fall through on <code>:not_found</code>.
               <.link navigate={feed_path(@current_user)} class="feature-try">
                 Upload a cover →
@@ -91,8 +99,9 @@ defmodule AshStorageDemoWeb.HomeLive do
           <div class="feature-row">
             <dt>Polymorphic attachments</dt>
             <dd>
-              A single <code>PolyAttachment</code> table points at any host —
-              <code>Post</code>, <code>Comment</code>, or <code>User</code> —
+              A single <code>PolyAttachment</code>
+              table points at any host — <code>Post</code>, <code>Comment</code>, or <code>User</code>
+              —
               via <code>Tag.has_many_attached :icons</code>.
               <a href="/admin/" class="feature-try">Browse in AshAdmin →</a>
             </dd>
@@ -272,7 +281,9 @@ defmodule AshStorageDemoWeb.HomeLive do
   defp bar_width(percent) when is_number(percent), do: percent |> min(100.0) |> max(0.0)
   defp bar_width(_), do: 0.0
 
-  defp format_percent(p) when is_number(p), do: "#{:erlang.float_to_binary(p * 1.0, decimals: 1)}%"
+  defp format_percent(p) when is_number(p),
+    do: "#{:erlang.float_to_binary(p * 1.0, decimals: 1)}%"
+
   defp format_percent(_), do: "—"
 
   defp volume_tone(p) when is_number(p) and p >= 90, do: "is-danger"

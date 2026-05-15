@@ -59,6 +59,7 @@ defmodule AshStorageDemo.MixProject do
       {:tidewave, "~> 0.5", only: [:dev]},
       {:live_debugger, "~> 1.0", only: [:dev]},
       {:oban_web, "~> 2.0"},
+      {:ash_credo, "~> 0.12.1"},
       {:ash_oban, "~> 0.8"},
       {:ash_admin, "~> 1.0"},
       {:ash_authentication_phoenix, "~> 2.0"},

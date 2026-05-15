@@ -70,7 +70,7 @@ defmodule AshStorageDemoWeb.Layouts do
         >
           Storage
         </.link>
-        <span class="nav-sep" :if={@current_user} />
+        <span :if={@current_user} class="nav-sep" />
         <.theme_switch />
         <span :if={@current_user} class="user-chip" data-role="current-user">
           <span class="user-avatar">
@@ -91,7 +91,14 @@ defmodule AshStorageDemoWeb.Layouts do
           data-role="nav-sign-out"
           aria-label="Sign out"
         >
-          <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7">
+          <svg
+            viewBox="0 0 24 24"
+            width="13"
+            height="13"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+          >
             <path d="M9 4H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h3" stroke-linecap="round" />
             <path d="M16 8l4 4-4 4M20 12H10" stroke-linecap="round" stroke-linejoin="round" />
           </svg>
@@ -148,11 +155,27 @@ defmodule AshStorageDemoWeb.Layouts do
       class={["nav-flash-pill", "nav-flash-" <> Atom.to_string(@kind)]}
     >
       <span class="nav-flash-icon" aria-hidden="true">
-        <svg :if={@kind == :info} viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8">
+        <svg
+          :if={@kind == :info}
+          viewBox="0 0 24 24"
+          width="13"
+          height="13"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+        >
           <circle cx="12" cy="12" r="9" />
           <path d="M12 8h.01M11 12h1v5h1" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-        <svg :if={@kind == :error} viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.8">
+        <svg
+          :if={@kind == :error}
+          viewBox="0 0 24 24"
+          width="13"
+          height="13"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+        >
           <circle cx="12" cy="12" r="9" />
           <path d="M12 7v6m0 3v.5" stroke-linecap="round" />
         </svg>
@@ -206,7 +229,14 @@ defmodule AshStorageDemoWeb.Layouts do
   def back_button(assigns) do
     ~H"""
     <.link navigate={@to} class="back-link" data-role="back-button">
-      <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="2">
+      <svg
+        viewBox="0 0 24 24"
+        width="13"
+        height="13"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2"
+      >
         <path d="M15 6l-6 6 6 6" />
       </svg>
       <span>{@label}</span>

@@ -58,10 +58,26 @@ defmodule AshStorageDemoWeb.StorageComponents do
 
     ~H"""
     <span class={["svc", "svc-" <> @kind]}>
-      <svg :if={@kind == "s3"} viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7">
+      <svg
+        :if={@kind == "s3"}
+        viewBox="0 0 24 24"
+        width="12"
+        height="12"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+      >
         <path d="M7 18a5 5 0 1 1 1.2-9.85A6 6 0 0 1 20 11a4 4 0 0 1-1 7.87" />
       </svg>
-      <svg :if={@kind == "disk"} viewBox="0 0 24 24" width="12" height="12" fill="none" stroke="currentColor" stroke-width="1.7">
+      <svg
+        :if={@kind == "disk"}
+        viewBox="0 0 24 24"
+        width="12"
+        height="12"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="1.7"
+      >
         <rect x="3" y="5" width="18" height="5" rx="1" />
         <rect x="3" y="14" width="18" height="5" rx="1" />
         <path d="M7 7.5h.01M7 16.5h.01" />
@@ -107,7 +123,13 @@ defmodule AshStorageDemoWeb.StorageComponents do
     <div class="ph" style={"height: #{@height}px;"}>
       <svg class="ph-bg" preserveAspectRatio="none" viewBox="0 0 100 100">
         <defs>
-          <pattern id={@safe_id} width="6" height="6" patternUnits="userSpaceOnUse" patternTransform="rotate(45)">
+          <pattern
+            id={@safe_id}
+            width="6"
+            height="6"
+            patternUnits="userSpaceOnUse"
+            patternTransform="rotate(45)"
+          >
             <line x1="0" y1="0" x2="0" y2="6" stroke="currentColor" stroke-width="1" opacity="0.35" />
           </pattern>
         </defs>
@@ -170,6 +192,7 @@ defmodule AshStorageDemoWeb.StorageComponents do
 
   defp normalize_service(:s3), do: "s3"
   defp normalize_service(:disk), do: "disk"
+
   defp normalize_service(kind) when is_binary(kind) do
     cond do
       String.contains?(kind, "disk") -> "disk"
@@ -177,6 +200,7 @@ defmodule AshStorageDemoWeb.StorageComponents do
       true -> "disk"
     end
   end
+
   defp normalize_service(kind), do: kind |> to_string() |> normalize_service()
 
   defp service_label("s3"), do: "S3"
