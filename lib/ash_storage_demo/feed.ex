@@ -7,5 +7,8 @@ defmodule AshStorageDemo.Feed do
 
   resources do
     resource AshStorageDemo.Feed.Post
+    resource AshStorageDemo.Feed.Comment
+    resource AshStorageDemo.Feed.Story
+    resource AshStorageDemo.Feed.Reaction
   end
 end

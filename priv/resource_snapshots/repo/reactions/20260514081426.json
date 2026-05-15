@@ -21,32 +21,32 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "name",
+      "source": "emoji",
       "type": "text"
     },
     {
       "allow_nil?": false,
-      "default": "nil",
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "record_type",
-      "type": "text"
+      "source": "inserted_at",
+      "type": "utc_datetime_usec"
     },
     {
       "allow_nil?": false,
-      "default": "nil",
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "record_id",
-      "type": "text"
+      "source": "updated_at",
+      "type": "utc_datetime_usec"
     },
     {
       "allow_nil?": false,
@@ -67,16 +67,47 @@
           "global": null,
           "strategy": null
         },
-        "name": "storage_attachments_blob_id_fkey",
-        "on_delete": null,
+        "name": "reactions_post_id_fkey",
+        "on_delete": "delete",
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "storage_blobs"
+        "table": "posts"
       },
       "scale": null,
       "size": null,
-      "source": "blob_id",
+      "source": "post_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "name": "reactions_author_id_fkey",
+        "on_delete": "nilify",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "users"
+      },
+      "scale": null,
+      "size": null,
+      "source": "author_id",
       "type": "uuid"
     }
   ],
@@ -86,7 +117,7 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "AB25990F98919B08314F64149035588303074003CA80B9BED029116DCA0CFB53",
+  "hash": "10AFCE6E896FCD16CCBE7F93A778C2A38E7415B2075E4FFFDE9250611D403142",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -95,5 +126,5 @@
   },
   "repo": "Elixir.AshStorageDemo.Repo",
   "schema": null,
-  "table": "storage_attachments"
+  "table": "reactions"
 }

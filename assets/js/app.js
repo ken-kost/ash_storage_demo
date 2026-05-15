@@ -26,16 +26,55 @@ import {hooks as colocatedHooks} from "phoenix-colocated/ash_storage_demo"
 import topbar from "../vendor/topbar"
 
 const csrfToken = document.querySelector("meta[name='csrf-token']").getAttribute("content")
+
+const Hooks = {
+  // Auto-dismisses an in-nav flash after 3s by simulating a click,
+  // which triggers the element's phx-click handler (lv:clear-flash + hide).
+  FlashAutoHide: {
+    mounted() {
+      this._timer = setTimeout(() => this.el.click(), 3000)
+    },
+    destroyed() {
+      if (this._timer) clearTimeout(this._timer)
+    }
+  }
+}
+
 const liveSocket = new LiveSocket("/live", Socket, {
   longPollFallbackMs: 2500,
   params: {_csrf_token: csrfToken},
-  hooks: {...colocatedHooks},
+  hooks: {...colocatedHooks, ...Hooks},
 })
 
 // Show progress bar on live navigation and form submits
 topbar.config({barColors: {0: "#29d"}, shadowColor: "rgba(0, 0, 0, .3)"})
 window.addEventListener("phx:page-loading-start", _info => topbar.show(300))
 window.addEventListener("phx:page-loading-stop", _info => topbar.hide())
+
+// Clipboard writes triggered by JS.dispatch("clipboard-copy", detail: %{text: ...})
+// inside a phx-click. Running inside the click handler preserves the user
+// activation that navigator.clipboard.writeText requires.
+window.addEventListener("clipboard-copy", (e) => {
+  const text = e.detail && e.detail.text
+  if (!text) return
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).catch(() => fallbackCopy(text))
+  } else {
+    fallbackCopy(text)
+  }
+})
+
+function fallbackCopy(text) {
+  const ta = document.createElement("textarea")
+  ta.value = text
+  ta.setAttribute("readonly", "")
+  ta.style.position = "fixed"
+  ta.style.opacity = "0"
+  document.body.appendChild(ta)
+  ta.select()
+  try { document.execCommand("copy") } catch (_) {}
+  document.body.removeChild(ta)
+}
 
 // connect if there are any LiveViews on the page
 liveSocket.connect()

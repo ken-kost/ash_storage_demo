@@ -67,7 +67,7 @@
           "global": null,
           "strategy": null
         },
-        "name": "posts_author_id_fkey",
+        "name": "messages_sender_id_fkey",
         "on_delete": "nilify",
         "on_update": null,
         "primary_key?": true,
@@ -76,7 +76,38 @@
       },
       "scale": null,
       "size": null,
-      "source": "author_id",
+      "source": "sender_id",
+      "type": "uuid"
+    },
+    {
+      "allow_nil?": true,
+      "default": "nil",
+      "generated?": false,
+      "precision": null,
+      "primary_key?": false,
+      "references": {
+        "deferrable": false,
+        "destination_attribute": "id",
+        "destination_attribute_default": null,
+        "destination_attribute_generated": null,
+        "index?": false,
+        "match_type": null,
+        "match_with": null,
+        "multitenancy": {
+          "attribute": null,
+          "global": null,
+          "strategy": null
+        },
+        "name": "messages_recipient_id_fkey",
+        "on_delete": "nilify",
+        "on_update": null,
+        "primary_key?": true,
+        "schema": "public",
+        "table": "users"
+      },
+      "scale": null,
+      "size": null,
+      "source": "recipient_id",
       "type": "uuid"
     }
   ],
@@ -86,7 +117,7 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "779EAD8E1024332B91E1D3FEB345D13910CD77D95359D5742295BD555AE25B24",
+  "hash": "32390E49F37CE3D1BD2E942FABBB1EF8581E512E147D5AFEF0EFF46E1837F061",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -95,5 +126,5 @@
   },
   "repo": "Elixir.AshStorageDemo.Repo",
   "schema": null,
-  "table": "posts"
+  "table": "messages"
 }

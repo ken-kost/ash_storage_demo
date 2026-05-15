@@ -21,19 +21,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "key",
-      "type": "text"
-    },
-    {
-      "allow_nil?": false,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "filename",
+      "source": "body",
       "type": "text"
     },
     {
@@ -45,7 +33,7 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "content_type",
+      "source": "taken_at",
       "type": "text"
     },
     {
@@ -57,8 +45,8 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "byte_size",
-      "type": "bigint"
+      "source": "camera",
+      "type": "text"
     },
     {
       "allow_nil?": true,
@@ -69,11 +57,11 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "checksum",
-      "type": "text"
+      "source": "gps_lat",
+      "type": "float"
     },
     {
-      "allow_nil?": false,
+      "allow_nil?": true,
       "default": "nil",
       "generated?": false,
       "precision": null,
@@ -81,80 +69,32 @@
       "references": null,
       "scale": null,
       "size": null,
-      "source": "service_name",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "%{}",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "service_opts",
-      "type": "map"
-    },
-    {
-      "allow_nil?": true,
-      "default": "%{}",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "metadata",
-      "type": "map"
-    },
-    {
-      "allow_nil?": true,
-      "default": "%{}",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "analyzers",
-      "type": "map"
+      "source": "gps_lng",
+      "type": "float"
     },
     {
       "allow_nil?": false,
-      "default": "false",
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "pending_purge",
-      "type": "boolean"
+      "source": "inserted_at",
+      "type": "utc_datetime_usec"
     },
     {
       "allow_nil?": false,
-      "default": "false",
+      "default": "fragment(\"(now() AT TIME ZONE 'utc')\")",
       "generated?": false,
       "precision": null,
       "primary_key?": false,
       "references": null,
       "scale": null,
       "size": null,
-      "source": "pending_analyzers",
-      "type": "boolean"
-    },
-    {
-      "allow_nil?": false,
-      "default": "false",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "pending_variants",
-      "type": "boolean"
+      "source": "updated_at",
+      "type": "utc_datetime_usec"
     },
     {
       "allow_nil?": true,
@@ -175,41 +115,17 @@
           "global": null,
           "strategy": null
         },
-        "name": "storage_blobs_variant_of_blob_id_fkey",
-        "on_delete": null,
+        "name": "posts_author_id_fkey",
+        "on_delete": "nilify",
         "on_update": null,
         "primary_key?": true,
         "schema": "public",
-        "table": "storage_blobs"
+        "table": "users"
       },
       "scale": null,
       "size": null,
-      "source": "variant_of_blob_id",
+      "source": "author_id",
       "type": "uuid"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "variant_name",
-      "type": "text"
-    },
-    {
-      "allow_nil?": true,
-      "default": "nil",
-      "generated?": false,
-      "precision": null,
-      "primary_key?": false,
-      "references": null,
-      "scale": null,
-      "size": null,
-      "source": "variant_digest",
-      "type": "text"
     }
   ],
   "base_filter": null,
@@ -218,7 +134,7 @@
   "custom_indexes": [],
   "custom_statements": [],
   "has_create_action": true,
-  "hash": "72C1E00585CDDA9DEA868F67E7E16262BC7A1777FF00F7B7A2E2D4F2DE272335",
+  "hash": "3337372C06D51F203AF0720EFBC33AC2C4F9C3147AD5EE2DD08B8C04774DCBEF",
   "identities": [],
   "multitenancy": {
     "attribute": null,
@@ -227,5 +143,5 @@
   },
   "repo": "Elixir.AshStorageDemo.Repo",
   "schema": null,
-  "table": "storage_blobs"
+  "table": "posts"
 }

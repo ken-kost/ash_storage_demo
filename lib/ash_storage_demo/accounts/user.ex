@@ -22,12 +22,8 @@ defmodule AshStorageDemo.Accounts.User do
     end
 
     strategies do
-      magic_link do
+      password :password do
         identity_field :email
-        registration_enabled? true
-        require_interaction? true
-
-        sender AshStorageDemo.Accounts.User.Senders.SendMagicLinkEmail
       end
 
       remember_me :remember_me
@@ -45,8 +41,28 @@ defmodule AshStorageDemo.Accounts.User do
 
     service({AshStorage.Service.S3, Application.compile_env(:ash_storage_demo, :s3)})
 
-    has_one_attached(:avatar)
-    has_one_attached(:cover_photo)
+    has_one_attached :avatar do
+      analyzer(AshStorageDemo.Analyzers.FileInfo)
+      analyzer(AshStorageDemo.Analyzers.ImageDimensions)
+      analyzer(AshStorageDemo.Analyzers.DominantColor)
+
+      variant(:small, {AshStorageDemo.Variants.Image, width: 64, height: 64, crop: :center},
+        generate: :eager
+      )
+
+      variant(:medium, {AshStorageDemo.Variants.Image, width: 256, height: 256, crop: :center},
+        generate: :eager
+      )
+
+      variant(:large, {AshStorageDemo.Variants.Image, width: 1024, height: 1024, crop: :center},
+        generate: :eager
+      )
+    end
+
+    has_one_attached :cover_photo do
+      analyzer(AshStorageDemo.Analyzers.FileInfo)
+      analyzer(AshStorageDemo.Analyzers.ImageDimensions)
+    end
   end
 
   actions do
@@ -63,46 +79,14 @@ defmodule AshStorageDemo.Accounts.User do
       description "Looks up a user by their email"
       get_by :email
     end
-
-    create :sign_in_with_magic_link do
-      description "Sign in or register a user with magic link."
-
-      argument :token, :string do
-        description "The token from the magic link that was sent to the user"
-        allow_nil? false
-      end
-
-      argument :remember_me, :boolean do
-        description "Whether to generate a remember me token"
-        allow_nil? true
-      end
-
-      upsert? true
-      upsert_identity :unique_email
-      upsert_fields [:email]
-
-      # Uses the information from the token to create or sign in the user
-      change AshAuthentication.Strategy.MagicLink.SignInChange
-
-      change {AshAuthentication.Strategy.RememberMe.MaybeGenerateTokenChange,
-              strategy_name: :remember_me}
-
-      metadata :token, :string do
-        allow_nil? false
-      end
-    end
-
-    action :request_magic_link do
-      argument :email, :ci_string do
-        allow_nil? false
-      end
-
-      run AshAuthentication.Strategy.MagicLink.Request
-    end
   end
 
   policies do
     bypass AshAuthentication.Checks.AshAuthenticationInteraction do
+      authorize_if always()
+    end
+
+    policy action_type(:read) do
       authorize_if always()
     end
   end
@@ -113,6 +97,11 @@ defmodule AshStorageDemo.Accounts.User do
     attribute :email, :ci_string do
       allow_nil? false
       public? true
+    end
+
+    attribute :hashed_password, :string do
+      allow_nil? false
+      sensitive? true
     end
   end
 
