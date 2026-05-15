@@ -28,13 +28,36 @@ defmodule AshStorageDemoWeb.Router do
     ash_authentication_live_session :authenticated_routes,
       on_mount: [{AshStorageDemoWeb.LiveUserAuth, :live_user_optional}] do
       live "/", HomeLive
+      live "/u/:id", PublicFeedLive
+      live "/p/:id", PublicPostLive
     end
 
     ash_authentication_live_session :require_authenticated,
       on_mount: [{AshStorageDemoWeb.LiveUserAuth, :live_user_required}] do
       live "/profile", ProfileLive
+      live "/feed", FeedLive
+      live "/storage-admin", StorageAdminLive
     end
   end
+
+  # Route through `DiskServeRuntime` so the on-disk root is resolved at request
+  # time from `:disk_storage` Application env. In prod the config/runtime.exs
+  # block sets that to `$DISK_STORAGE_ROOT/...` (a Fly volume mount); in dev it
+  # falls back to `priv/storage/...`.
+  forward "/files/documents", AshStorageDemoWeb.DiskServeRuntime, name: :documents
+
+  forward "/files/cover_images_mirror", AshStorageDemoWeb.DiskServeRuntime,
+    name: :cover_images_mirror
+
+  forward "/media", AshStorage.Plug.Proxy,
+    service: {AshStorage.Service.S3, Application.compile_env(:ash_storage_demo, :s3)}
+
+  # Alternative S3 access pattern: issue an HTTP redirect to a presigned
+  # service URL instead of streaming bytes through the app. FeedLive exposes
+  # a toggle that flips rendered URLs between /media (proxy) and /r (redirect)
+  # for comparison.
+  forward "/r", AshStorage.Plug.Redirect,
+    service: {AshStorage.Service.S3, Application.compile_env(:ash_storage_demo, :s3)}
 
   scope "/", AshStorageDemoWeb do
     pipe_through :browser
@@ -42,39 +65,13 @@ defmodule AshStorageDemoWeb.Router do
     auth_routes AuthController, AshStorageDemo.Accounts.User, path: "/auth"
     sign_out_route AuthController
 
-    # Remove these if you'd like to use your own authentication views
     sign_in_route register_path: "/register",
-                  reset_path: "/reset",
                   auth_routes_prefix: "/auth",
                   on_mount: [{AshStorageDemoWeb.LiveUserAuth, :live_no_user}],
                   overrides: [
                     AshStorageDemoWeb.AuthOverrides,
                     Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
                   ]
-
-    # Remove this if you do not want to use the reset password feature
-    reset_route auth_routes_prefix: "/auth",
-                overrides: [
-                  AshStorageDemoWeb.AuthOverrides,
-                  Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
-                ]
-
-    # Remove this if you do not use the confirmation strategy
-    confirm_route AshStorageDemo.Accounts.User, :confirm_new_user,
-      auth_routes_prefix: "/auth",
-      overrides: [
-        AshStorageDemoWeb.AuthOverrides,
-        Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
-      ]
-
-    # Remove this if you do not use the magic link strategy.
-    magic_sign_in_route(AshStorageDemo.Accounts.User, :magic_link,
-      auth_routes_prefix: "/auth",
-      overrides: [
-        AshStorageDemoWeb.AuthOverrides,
-        Elixir.AshAuthentication.Phoenix.Overrides.DaisyUI
-      ]
-    )
   end
 
   # Other scopes may use custom stacks.
