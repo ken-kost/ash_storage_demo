@@ -200,12 +200,36 @@ defmodule AshStorageDemoWeb.FeedLive do
         <h1>Feed</h1>
         <p class="page-sub">
           <span>
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M7 18a5 5 0 1 1 1.2-9.85A6 6 0 0 1 20 11a4 4 0 0 1-1 7.87" /></svg>
+            <svg
+              viewBox="0 0 24 24"
+              width="13"
+              height="13"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+            >
+              <path d="M7 18a5 5 0 1 1 1.2-9.85A6 6 0 0 1 20 11a4 4 0 0 1-1 7.87" />
+            </svg>
             photos · videos route to <strong>S3</strong>
           </span>
           <span class="sep">/</span>
           <span>
-            <svg viewBox="0 0 24 24" width="13" height="13" fill="none" stroke="currentColor" stroke-width="1.7"><rect x="3" y="5" width="18" height="5" rx="1" /><rect x="3" y="14" width="18" height="5" rx="1" /></svg>
+            <svg
+              viewBox="0 0 24 24"
+              width="13"
+              height="13"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.7"
+            >
+              <rect x="3" y="5" width="18" height="5" rx="1" /><rect
+                x="3"
+                y="14"
+                width="18"
+                height="5"
+                rx="1"
+              />
+            </svg>
             documents route to <strong>Disk</strong>
           </span>
         </p>
@@ -247,10 +271,34 @@ defmodule AshStorageDemoWeb.FeedLive do
         >{Phoenix.HTML.Form.input_value(@form, :body)}</textarea>
 
         <div class="composer-slots">
-          <.composer_slot label="Cover image" hint=".jpg .png .webp · 16MB" svc={:s3} max="1" upload={@uploads.cover_image} />
-          <.composer_slot label="Photos" hint="up to 6 · 16MB each" svc={:s3} max="6" upload={@uploads.photos} />
-          <.composer_slot label="Videos" hint="up to 2 · 64MB each" svc={:s3} max="2" upload={@uploads.videos} />
-          <.composer_slot label="Documents" hint=".pdf .txt .md .csv · 16MB" svc={:disk} max="4" upload={@uploads.documents} />
+          <.composer_slot
+            label="Cover image"
+            hint=".jpg .png .webp · 16MB"
+            svc={:s3}
+            max="1"
+            upload={@uploads.cover_image}
+          />
+          <.composer_slot
+            label="Photos"
+            hint="up to 6 · 16MB each"
+            svc={:s3}
+            max="6"
+            upload={@uploads.photos}
+          />
+          <.composer_slot
+            label="Videos"
+            hint="up to 2 · 64MB each"
+            svc={:s3}
+            max="2"
+            upload={@uploads.videos}
+          />
+          <.composer_slot
+            label="Documents"
+            hint=".pdf .txt .md .csv · 16MB"
+            svc={:disk}
+            max="4"
+            upload={@uploads.documents}
+          />
         </div>
 
         <div class="composer-foot">
@@ -301,7 +349,14 @@ defmodule AshStorageDemoWeb.FeedLive do
       </div>
       <label class="slot-drop" for={@upload.ref}>
         <%= if @files == [] do %>
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7">
+          <svg
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+          >
             <path d="M12 16V4M7 9l5-5 5 5M4 20h16" />
           </svg>
           <span>Drop or <u>browse</u></span>

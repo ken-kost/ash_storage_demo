@@ -158,10 +158,38 @@ defmodule AshStorageDemoWeb.ProfileLive do
           <span :if={!@user.avatar_url}>{initial(@user)}</span>
         </div>
         <div class="avatar-variants">
-          <.variant_tile size="lg" label="original" px="1024" url={@user.avatar_large_url} tint={@tint} initial={initial(@user)} />
-          <.variant_tile size="md" label="display" px="256" url={@user.avatar_medium_url} tint={@tint} initial={initial(@user)} />
-          <.variant_tile size="sm" label="medium" px="64" url={@user.avatar_small_url} tint={@tint} initial={initial(@user)} />
-          <.variant_tile size="xs" label="small" px="24" url={@user.avatar_small_url} tint={@tint} initial={initial(@user)} />
+          <.variant_tile
+            size="lg"
+            label="original"
+            px="1024"
+            url={@user.avatar_large_url}
+            tint={@tint}
+            initial={initial(@user)}
+          />
+          <.variant_tile
+            size="md"
+            label="display"
+            px="256"
+            url={@user.avatar_medium_url}
+            tint={@tint}
+            initial={initial(@user)}
+          />
+          <.variant_tile
+            size="sm"
+            label="medium"
+            px="64"
+            url={@user.avatar_small_url}
+            tint={@tint}
+            initial={initial(@user)}
+          />
+          <.variant_tile
+            size="xs"
+            label="small"
+            px="24"
+            url={@user.avatar_small_url}
+            tint={@tint}
+            initial={initial(@user)}
+          />
         </div>
       </div>
 
@@ -172,7 +200,14 @@ defmodule AshStorageDemoWeb.ProfileLive do
         class="panel-upload"
       >
         <label class="file-input-zone" for={@upload.ref}>
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7">
+          <svg
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+          >
             <path d="M12 16V4M7 9l5-5 5 5M4 20h16" />
           </svg>
           <span>Drop a new avatar, or <u>browse</u></span>
@@ -190,9 +225,12 @@ defmodule AshStorageDemoWeb.ProfileLive do
         </span>
       </div>
 
-      <footer class="panel-foot" :if={@user.avatar}>
+      <footer :if={@user.avatar} class="panel-foot">
         <.field k="blob_id" v={short_id(@user.avatar.blob && @user.avatar.blob.id)} />
-        <.field k="service" v={(@user.avatar.blob && to_string(@user.avatar.blob.service_name)) || "—"} />
+        <.field
+          k="service"
+          v={(@user.avatar.blob && to_string(@user.avatar.blob.service_name)) || "—"}
+        />
         <.field
           k="content_type"
           v={(@user.avatar.blob && @user.avatar.blob.content_type) || "—"}
@@ -255,7 +293,14 @@ defmodule AshStorageDemoWeb.ProfileLive do
         class="panel-upload"
       >
         <label class="file-input-zone" for={@upload.ref}>
-          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.7">
+          <svg
+            viewBox="0 0 24 24"
+            width="14"
+            height="14"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.7"
+          >
             <path d="M12 16V4M7 9l5-5 5 5M4 20h16" />
           </svg>
           <span>Drop a new cover, or <u>browse</u></span>
@@ -273,7 +318,7 @@ defmodule AshStorageDemoWeb.ProfileLive do
         </span>
       </div>
 
-      <footer class="panel-foot" :if={@user.cover_photo}>
+      <footer :if={@user.cover_photo} class="panel-foot">
         <.field k="blob_id" v={short_id(@user.cover_photo.blob && @user.cover_photo.blob.id)} />
         <.field
           k="service"

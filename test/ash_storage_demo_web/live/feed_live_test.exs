@@ -59,7 +59,12 @@ defmodule AshStorageDemoWeb.FeedLiveTest do
     assert has_element?(view, "[data-role='feed-copy-link']")
     assert has_element?(view, "[data-role='post-copy-link']")
     assert has_element?(view, "[data-role='view-public-feed']")
-    assert has_element?(view, "[data-role='post-open-link'][href='/p/" <> "#{Enum.at(Ash.read!(Post, authorize?: false), 0).id}']")
+
+    assert has_element?(
+             view,
+             "[data-role='post-open-link'][href='/p/" <>
+               "#{Enum.at(Ash.read!(Post, authorize?: false), 0).id}']"
+           )
   end
 
   test "copy-link event sets the flash so the toast pill renders", %{conn: conn, user: user} do
