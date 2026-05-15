@@ -2,7 +2,7 @@
   <tr>
     <td><img src="priv/static/images/ashtray-logo.svg" alt="Ashtray logo" width="180" /></td>
     <td>
-      <h1>Ashtray</h1>
+      <h1><a href="https://ash-storage-demo.fly.dev/">Ashtray</a></h1>
       <p>A small Phoenix app that exercises every corner of <a href="https://github.com/ash-project/ash_storage"><code>ash_storage</code></a>,</p>
       <p>multi-service routing, analyzers, variants, mirroring, polymorphic attachments and an orphan sweeper,</p>
       <p>in one feed-shaped demo.</p>
