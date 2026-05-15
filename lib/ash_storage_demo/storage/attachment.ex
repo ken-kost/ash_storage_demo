@@ -15,12 +15,15 @@ defmodule AshStorageDemo.Storage.Attachment do
     repo AshStorageDemo.Repo
 
     references do
-      reference :user, on_delete: :delete
-      reference :post, on_delete: :delete
-      reference :comment, on_delete: :delete
-      reference :story, on_delete: :delete
-      # message intentionally not :delete — `Message.files` declares
-      # `dependent: false` so attachments outlive the message.
+      # All parent refs use `:nilify` (not `:delete`) so AshStorage's
+      # `HandleDependentAttachments` `after_action` hook can still find the
+      # rows and call `Ash.destroy(att, ...)` on them. With `:delete`,
+      # Postgres cascades during the parent's DELETE and the hook then
+      # races into `Ash.Error.Changes.StaleRecord`.
+      reference :user, on_delete: :nilify
+      reference :post, on_delete: :nilify
+      reference :comment, on_delete: :nilify
+      reference :story, on_delete: :nilify
       reference :message, on_delete: :nilify
     end
   end

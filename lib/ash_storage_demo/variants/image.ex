@@ -46,21 +46,25 @@ defmodule AshStorageDemo.Variants.Image do
     Image.thumbnail(image, "#{width}x#{height}")
   end
 
-  defp write(image, path, nil), do: Image.write(image, path)
+  defp write(image, path, nil), do: write(image, path, :jpg)
 
+  # `Image.write(image, path, suffix: ".xxx")` ignores the suffix for file-path
+  # destinations and derives the format from the path's extension. AshStorage's
+  # variant pipeline hands us extension-less temp paths, so the saver lookup
+  # fails with "Failed to find save". Write to a buffer (where suffix is
+  # honoured) and dump the bytes to the path ourselves.
   defp write(image, path, format) when format in [:jpg, :png, :webp] do
-    Image.write(image, path, suffix: ".#{format}")
+    with {:ok, buffer} <- Image.write(image, :memory, suffix: ".#{format}"),
+         :ok <- File.write(path, buffer) do
+      {:ok, image}
+    end
   end
 
+  # Match `write/3`'s default-to-JPEG behaviour. Earlier this inferred a mime
+  # from the source extension, which mislabelled variants (`write/3` always
+  # re-encodes to JPEG when no `:format` is given, regardless of source).
   defp content_type_for(:jpg, _), do: "image/jpeg"
   defp content_type_for(:png, _), do: "image/png"
   defp content_type_for(:webp, _), do: "image/webp"
-
-  defp content_type_for(nil, source_path) do
-    case Path.extname(source_path) do
-      ".png" -> "image/png"
-      ".webp" -> "image/webp"
-      _ -> "image/jpeg"
-    end
-  end
+  defp content_type_for(nil, _), do: "image/jpeg"
 end
