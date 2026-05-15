@@ -1,10 +1,8 @@
 defmodule AshStorageDemoWeb.StorageAdminLive do
   @moduledoc """
-  Admin LiveView for the storage backbone: lists every blob with its
-  service, byte size, analyzer status pills, and a purge-orphan button.
-
-  Counts orphan blobs (blob rows with no attachment in any of the three
-  attachment tables) and lets an operator drop them in one click.
+  Admin LiveView for the storage backbone — KPI strip across the top,
+  bytes-per-service / counts-per-content-type cards, orphan sweeper, and
+  a recent-blobs list with analyzer pills.
   """
   use AshStorageDemoWeb, :live_view
 
@@ -15,7 +13,7 @@ defmodule AshStorageDemoWeb.StorageAdminLive do
 
   @impl true
   def mount(_params, _session, socket) do
-    {:ok, reload(socket)}
+    {:ok, assign(socket, filter: "all") |> reload()}
   end
 
   @impl true
@@ -24,21 +22,55 @@ defmodule AshStorageDemoWeb.StorageAdminLive do
     {:noreply, socket |> put_flash(:info, "Removed #{count} orphan blob record(s)") |> reload()}
   end
 
+  def handle_event("filter", %{"kind" => kind}, socket) do
+    {:noreply, assign(socket, filter: kind) |> reload()}
+  end
+
   defp reload(socket) do
     blobs =
       Blob
       |> Ash.Query.sort(id: :desc)
-      |> Ash.Query.limit(50)
-      |> Ash.read!()
+      |> Ash.read!(page: [limit: 50, count: false], authorize?: false)
+      |> page_results()
+      |> filter_blobs(socket.assigns[:filter] || "all")
 
     stats = build_stats()
     orphan_count = length(Orphans.orphan_blobs())
+    blob_total = Repo.aggregate("storage_blobs", :count, :id) || 0
+    pending_count = pending_analyzer_count()
 
     socket
     |> assign(blobs: blobs)
     |> assign(stats: stats)
     |> assign(orphan_count: orphan_count)
+    |> assign(blob_total: blob_total)
+    |> assign(pending_count: pending_count)
   end
+
+  defp page_results(%{results: results}), do: results
+  defp page_results(list) when is_list(list), do: list
+
+  defp filter_blobs(blobs, "all"), do: blobs
+
+  defp filter_blobs(blobs, "images"),
+    do: Enum.filter(blobs, &String.starts_with?(content_type_or(&1, ""), "image/"))
+
+  defp filter_blobs(blobs, "video"),
+    do: Enum.filter(blobs, &String.starts_with?(content_type_or(&1, ""), "video/"))
+
+  defp filter_blobs(blobs, "docs"),
+    do:
+      Enum.filter(blobs, fn b ->
+        ct = content_type_or(b, "")
+
+        String.starts_with?(ct, "application/") or String.starts_with?(ct, "text/")
+      end)
+
+  defp filter_blobs(blobs, "variants"),
+    do: Enum.filter(blobs, & &1.variant_of_blob_id)
+
+  defp content_type_or(%{content_type: ct}, _) when is_binary(ct), do: ct
+  defp content_type_or(_, default), do: default
 
   defp build_stats do
     rows =
@@ -53,110 +85,202 @@ defmodule AshStorageDemoWeb.StorageAdminLive do
       )
       |> Repo.all()
 
-    %{
-      by_service:
-        rows
-        |> Enum.group_by(& &1.service_name)
-        |> Enum.map(fn {service, group} ->
-          {service, Enum.reduce(group, 0, &(&1.bytes + &2))}
-        end)
-        |> Enum.sort_by(fn {_, bytes} -> -bytes end),
-      by_content_type:
-        rows
-        |> Enum.group_by(& &1.content_type)
-        |> Enum.map(fn {ct, group} ->
-          {ct || "(unknown)", Enum.reduce(group, 0, &(&1.count + &2))}
-        end)
-        |> Enum.sort_by(fn {_, count} -> -count end)
-    }
+    total_bytes = Enum.reduce(rows, 0, &(to_int(&1.bytes) + &2))
+
+    by_service =
+      rows
+      |> Enum.group_by(& &1.service_name)
+      |> Enum.map(fn {service, group} ->
+        {service, Enum.reduce(group, 0, &(to_int(&1.bytes) + &2))}
+      end)
+      |> Enum.sort_by(fn {_, bytes} -> -bytes end)
+
+    by_content_type =
+      rows
+      |> Enum.group_by(& &1.content_type)
+      |> Enum.map(fn {ct, group} ->
+        {ct || "(unknown)", Enum.reduce(group, 0, &(to_int(&1.count) + &2))}
+      end)
+      |> Enum.sort_by(fn {_, count} -> -count end)
+
+    %{by_service: by_service, by_content_type: by_content_type, total_bytes: total_bytes}
   end
+
+  defp pending_analyzer_count do
+    # Loose heuristic: blobs whose analyzers map has any entry with status "pending".
+    # We can't filter that in SQL portably, so we scan a recent slice.
+    Blob
+    |> Ash.Query.sort(id: :desc)
+    |> Ash.read!(page: [limit: 200, count: false], authorize?: false)
+    |> page_results()
+    |> Enum.count(fn blob ->
+      analyzers = blob.analyzers || %{}
+
+      Enum.any?(analyzers, fn {_mod, info} -> info["status"] == "pending" end)
+    end)
+  end
+
+  defp to_int(nil), do: 0
+  defp to_int(%Decimal{} = d), do: Decimal.to_integer(d)
+  defp to_int(n) when is_integer(n), do: n
+
+  defp service_pct(_bytes, 0), do: 0
+  defp service_pct(bytes, _total) when bytes <= 0, do: 0
+  defp service_pct(bytes, total), do: round(bytes / total * 100)
+
+  defp max_count(counts), do: counts |> Enum.map(&elem(&1, 1)) |> Enum.max(fn -> 1 end)
+
+  defp content_type_pct(_count, 0), do: 0
+  defp content_type_pct(count, max), do: round(count / max * 100)
 
   @impl true
   def render(assigns) do
     ~H"""
-    <Layouts.app flash={@flash}>
-      <section class="space-y-8">
-        <header class="space-y-1">
-          <h1 class="text-3xl font-bold">Storage admin</h1>
-          <p class="text-base-content/70">
-            Aggregate view across every host. See <a class="link" href="/admin/">/admin/</a>
-            for the per-resource AshAdmin UI.
+    <Layouts.app flash={@flash} current_user={@current_user} active="storage">
+      <Layouts.back_button />
+      <div class="page-head">
+        <h1>Storage admin</h1>
+        <p class="page-sub">
+          Aggregate view across every host. For the per-resource UI see
+          <a class="inline-link mono" href="/admin/">/admin/</a>.
+        </p>
+      </div>
+
+      <section class="kpi-row">
+        <.kpi
+          label="Total blobs"
+          value={Integer.to_string(@blob_total)}
+          hint={"#{length(@blobs)} shown"}
+        />
+        <.kpi
+          label="Stored bytes"
+          value={format_bytes(@stats.total_bytes)}
+          hint={service_split(@stats.by_service)}
+        />
+        <.kpi
+          label="Analyzer queue"
+          value={"#{@pending_count} pending"}
+          hint="rolling 200-blob sample"
+          tone={(@pending_count > 0 && "wait") || nil}
+        />
+        <.kpi
+          label="Orphans"
+          value={Integer.to_string(@orphan_count)}
+          hint="purgeable"
+          tone={(@orphan_count > 0 && "warn") || nil}
+        />
+      </section>
+
+      <section class="two-up">
+        <article class="tile-card">
+          <h2 class="tile-card-title">Bytes per service</h2>
+          <ul :if={@stats.by_service != []} class="bar-list">
+            <li :for={{service, bytes} <- @stats.by_service}>
+              <div class="bar-meta">
+                <span class="bar-name">
+                  <.service_tag kind={service} /> <span class="mono">{service}</span>
+                </span>
+                <span class="bar-bytes">{format_bytes(bytes)}</span>
+              </div>
+              <div class="bar-track">
+                <span class="bar-fill" style={"width: #{service_pct(bytes, @stats.total_bytes)}%;"} />
+              </div>
+            </li>
+          </ul>
+          <p :if={@stats.by_service == []} class="text-sm" style="color: var(--ink-3)">
+            No blobs yet.
           </p>
-        </header>
+        </article>
 
-        <section class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <article class="rounded-box border border-base-300 p-4">
-            <h2 class="font-semibold mb-2">Bytes per service</h2>
-            <ul class="text-sm space-y-1">
-              <li :for={{service, bytes} <- @stats.by_service} class="flex justify-between">
-                <span>{service}</span>
-                <span class="font-mono">{format_bytes(bytes)}</span>
-              </li>
-              <li :if={@stats.by_service == []} class="text-base-content/60">No blobs yet.</li>
-            </ul>
-          </article>
-
-          <article class="rounded-box border border-base-300 p-4">
-            <h2 class="font-semibold mb-2">Count per content-type</h2>
-            <ul class="text-sm space-y-1">
-              <li :for={{ct, count} <- @stats.by_content_type} class="flex justify-between">
-                <span>{ct}</span>
-                <span class="font-mono">{count}</span>
-              </li>
-              <li :if={@stats.by_content_type == []} class="text-base-content/60">No blobs yet.</li>
-            </ul>
-          </article>
-        </section>
-
-        <section class="rounded-box border border-base-300 p-4 flex items-center justify-between">
-          <div>
-            <h2 class="font-semibold">Orphan blobs</h2>
-            <p class="text-sm text-base-content/70">
-              Blob rows with no attachment in any of the three attachment tables.
-            </p>
-          </div>
-          <div class="flex items-center gap-3">
-            <span class="badge badge-warning">{@orphan_count}</span>
-            <button
-              type="button"
-              class="btn btn-sm btn-error"
-              phx-click="purge-orphans"
-              disabled={@orphan_count == 0}
-              data-confirm="Drop orphan blob records?"
+        <article class="tile-card">
+          <h2 class="tile-card-title">Count per content-type</h2>
+          <% max_ct = (@stats.by_content_type != [] && max_count(@stats.by_content_type)) || 1 %>
+          <ul :if={@stats.by_content_type != []} class="ct-list">
+            <li
+              :for={{ct, count} <- @stats.by_content_type}
+              class={ct == "(unknown)" && "is-muted"}
             >
-              Purge orphan records
+              <span class="ct-name">{ct}</span>
+              <span class="ct-rail">
+                <span class="ct-fill" style={"width: #{content_type_pct(count, max_ct)}%;"} />
+              </span>
+              <span class="ct-count">{count}</span>
+            </li>
+          </ul>
+          <p :if={@stats.by_content_type == []} class="text-sm" style="color: var(--ink-3)">
+            No blobs yet.
+          </p>
+        </article>
+      </section>
+
+      <article class="orphan-bar">
+        <div>
+          <h2>Orphan blobs</h2>
+          <p>Blob rows with no attachment in any of the three attachment tables.</p>
+        </div>
+        <div class="orphan-actions">
+          <span class="orphan-count">{@orphan_count}</span>
+          <button
+            type="button"
+            class="btn btn-error btn-sm"
+            phx-click="purge-orphans"
+            disabled={@orphan_count == 0}
+            data-confirm="Drop orphan blob records?"
+          >
+            Purge orphan records
+          </button>
+        </div>
+      </article>
+
+      <section>
+        <header class="blobs-head">
+          <h2>Recent blobs</h2>
+          <div class="theme-switch" role="group" aria-label="Filter">
+            <button
+              :for={{key, label} <- [{"all", "All"}, {"images", "Images"}, {"video", "Video"}, {"docs", "Docs"}, {"variants", "Variants"}]}
+              type="button"
+              phx-click="filter"
+              phx-value-kind={key}
+              class={@filter == key && "is-on"}
+              style={"color: " <> (@filter == key && "var(--ink)" || "var(--ink-3)")}
+            >
+              {label}
             </button>
           </div>
-        </section>
+        </header>
 
-        <section>
-          <h2 class="font-semibold mb-2">Recent blobs</h2>
-          <ul class="space-y-3">
-            <li :for={blob <- @blobs} class="rounded-box border border-base-300 p-3 space-y-2">
-              <div class="flex items-center justify-between text-sm">
-                <span class="font-mono break-all">{blob.filename}</span>
-                <span class="badge badge-sm badge-outline">{blob.content_type || "?"}</span>
+        <ul :if={@blobs != []} class="blob-list">
+          <li :for={blob <- @blobs} class="blob">
+            <div class="blob-head">
+              <span class="blob-name">{blob.filename}</span>
+              <div class="blob-tags">
+                <span :if={blob.variant_of_blob_id} class="tag-variant">
+                  variant · {blob.variant_name}
+                </span>
+                <span class="badge-mono">{blob.content_type || "?"}</span>
               </div>
-              <div class="flex items-center gap-2 text-xs text-base-content/70">
-                <span>{blob.service_name}</span>
-                <span>·</span>
-                <span>{format_bytes(blob.byte_size)}</span>
-                <span :if={blob.variant_of_blob_id}>· variant: {blob.variant_name}</span>
-              </div>
-              <.analyzer_pills blob={blob} />
-              <.blob_metadata blob={blob} />
-            </li>
-            <li :if={@blobs == []} class="text-base-content/60 text-sm">No blobs yet.</li>
-          </ul>
-        </section>
+            </div>
+            <div class="blob-sub">
+              <.service_tag kind={blob.service_name} />
+              <span class="sep">·</span>
+              <span class="mono">{format_bytes(blob.byte_size)}</span>
+            </div>
+            <.analyzer_pills blob={blob} />
+            <.blob_metadata blob={blob} />
+          </li>
+        </ul>
+
+        <p :if={@blobs == []} class="text-sm" style="color: var(--ink-3)">No blobs yet.</p>
       </section>
     </Layouts.app>
     """
   end
 
-  defp format_bytes(nil), do: "0 B"
-  defp format_bytes(b) when b < 1024, do: "#{b} B"
-  defp format_bytes(b) when b < 1_048_576, do: "#{Float.round(b / 1024, 1)} KB"
-  defp format_bytes(b) when b < 1_073_741_824, do: "#{Float.round(b / 1_048_576, 1)} MB"
-  defp format_bytes(b), do: "#{Float.round(b / 1_073_741_824, 2)} GB"
+  defp service_split([]), do: nil
+
+  defp service_split(services) do
+    services
+    |> Enum.map(fn {svc, bytes} -> "#{svc} #{format_bytes(bytes)}" end)
+    |> Enum.join(" · ")
+  end
 end

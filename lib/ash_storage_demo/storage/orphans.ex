@@ -26,7 +26,8 @@ defmodule AshStorageDemo.Storage.Orphans do
       |> MapSet.new()
 
     Repo.all(from b in "storage_blobs", select: %{id: b.id, key: b.key})
-    |> Enum.reject(fn %{id: id} -> MapSet.member?(used_blob_ids, Ecto.UUID.cast!(id)) end)
+    |> Enum.reject(fn %{id: id} -> MapSet.member?(used_blob_ids, id) end)
+    |> Enum.map(&%{id: Ecto.UUID.cast!(&1.id), key: &1.key})
   end
 
   @doc """
@@ -37,13 +38,18 @@ defmodule AshStorageDemo.Storage.Orphans do
   """
   def purge_orphan_records do
     orphans = orphan_blobs()
-    ids = Enum.map(orphans, & &1.id)
 
-    if ids == [] do
+    binary_ids =
+      Enum.map(orphans, fn %{id: id} ->
+        {:ok, raw} = Ecto.UUID.dump(id)
+        raw
+      end)
+
+    if binary_ids == [] do
       0
     else
       {count, _} =
-        Repo.delete_all(from b in "storage_blobs", where: b.id in ^ids)
+        Repo.delete_all(from b in "storage_blobs", where: b.id in ^binary_ids)
 
       count
     end
