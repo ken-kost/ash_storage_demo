@@ -65,7 +65,7 @@ config :spark,
 config :ash_storage_demo,
   ecto_repos: [AshStorageDemo.Repo],
   generators: [timestamp_type: :utc_datetime],
-  ash_domains: [AshStorageDemo.Accounts],
+  ash_domains: [AshStorageDemo.Accounts, AshStorageDemo.Storage],
   ash_authentication: [return_error_on_invalid_magic_link_token?: true]
 
 # Configure the endpoint
